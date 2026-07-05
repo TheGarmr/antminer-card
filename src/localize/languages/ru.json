@@ -1,0 +1,73 @@
+{
+  "common": {
+    "title": "Карточка ASIC-майнера",
+    "description": "Карточка Home Assistant для ASIC-майнеров (интеграция hass-miner)",
+    "version": "Версия"
+  },
+  "config": {
+    "language": "Язык",
+    "title": "Заголовок",
+    "prefix": "Префикс сенсоров",
+    "minerName": "Имя майнера",
+    "model": "Модель (вручную)",
+    "deviceId": "ID устройства (опционально)",
+    "webUrl": "URL веб-интерфейса (вручную)",
+    "powerSwitch": "Выключатель питания / автомат (опционально)",
+    "decimals": "Знаков после запятой (хешрейт)",
+    "tempWarn": "Темп. предупреждение (°C)",
+    "tempCrit": "Темп. критическая (°C)",
+    "boardCount": "Хешборды (0 = авто)",
+    "fanCount": "Кулеры (0 = авто)",
+    "titleAction": "Действие по клику на заголовок",
+    "manualAssignment": "Ручное назначение сущностей",
+    "titleShowHide": "Показать / Скрыть зоны",
+    "showTitle": "Заголовок",
+    "showButtons": "Кнопки",
+    "showMain": "Основное",
+    "showFans": "Кулеры",
+    "showBoards": "Платы",
+    "showCardVersion": "Версия",
+    "hashrate": "Сущность хешрейта",
+    "ideal_hashrate": "Сущность идеального хешрейта",
+    "temperature": "Сущность температуры",
+    "miner_consumption": "Сущность потребления",
+    "power_limit": "Сущность лимита мощности",
+    "efficiency": "Сущность эффективности",
+    "active_preset_name": "Сущность активного пресета",
+    "active": "Переключатель майнинга",
+    "device_id": "ID устройства"
+  },
+  "buttons": {
+    "mining": "Майнить",
+    "pause": "Пауза",
+    "resume": "Старт",
+    "power": "Питание",
+    "powerOn": "Включить питание",
+    "webui": "Веб-интерфейс"
+  },
+  "stats": {
+    "hashrate": "Хешрейт:",
+    "idealHashrate": "Идеальный:",
+    "temperature": "Температура:",
+    "power": "Мощность:",
+    "powerLimit": "Лимит:",
+    "efficiency": "Эффективность:",
+    "preset": "Пресет:",
+    "fan": "Кулер",
+    "board": "Плата",
+    "chip": "Чип:",
+    "boardTemp": "Плата:"
+  },
+  "status": {
+    "mining": "МАЙНИТ",
+    "stopped": "ОСТАНОВЛЕН",
+    "offline": "ОФФЛАЙН",
+    "unknown": "НЕИЗВЕСТНО"
+  },
+  "html_texts": {
+    "boards": "Хешплаті",
+    "fans": "Кулеры",
+    "firmware": "Прошивка",
+    "offlineNote": "Автомат выключен — питание на майнер не подаётся"
+  }
+}

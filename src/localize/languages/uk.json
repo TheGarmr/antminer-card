@@ -1,0 +1,73 @@
+{
+  "common": {
+    "title": "Картка ASIC-майнера",
+    "description": "Картка Home Assistant для ASIC-майнерів (інтеграція hass-miner)",
+    "version": "Версія"
+  },
+  "config": {
+    "language": "Мова",
+    "title": "Заголовок",
+    "prefix": "Префікс сенсорів",
+    "minerName": "Ім'я майнера",
+    "model": "Модель (вручну)",
+    "deviceId": "ID пристрою (опційно)",
+    "webUrl": "URL веб-інтерфейсу (вручну)",
+    "powerSwitch": "Вимикач живлення / автомат (опційно)",
+    "decimals": "Знаків після коми (хешрейт)",
+    "tempWarn": "Темп. попередження (°C)",
+    "tempCrit": "Темп. критична (°C)",
+    "boardCount": "Хешборди (0 = авто)",
+    "fanCount": "Кулери (0 = авто)",
+    "titleAction": "Дія при кліку на заголовок",
+    "manualAssignment": "Ручне призначення сутностей",
+    "titleShowHide": "Показати / Сховати зони",
+    "showTitle": "Заголовок",
+    "showButtons": "Кнопки",
+    "showMain": "Основне",
+    "showFans": "Кулери",
+    "showBoards": "Плати",
+    "showCardVersion": "Версія",
+    "hashrate": "Сутність хешрейту",
+    "ideal_hashrate": "Сутність ідеального хешрейту",
+    "temperature": "Сутність температури",
+    "miner_consumption": "Сутність споживання",
+    "power_limit": "Сутність ліміту потужності",
+    "efficiency": "Сутність ефективності",
+    "active_preset_name": "Сутність активного пресету",
+    "active": "Перемикач майнінгу",
+    "device_id": "ID пристрою"
+  },
+  "buttons": {
+    "mining": "Майніти",
+    "pause": "Пауза",
+    "resume": "Старт",
+    "power": "Живлення",
+    "powerOn": "Увімкнути живлення",
+    "webui": "Веб-інтерфейс"
+  },
+  "stats": {
+    "hashrate": "Хешрейт:",
+    "idealHashrate": "Ідеальний:",
+    "temperature": "Температура:",
+    "power": "Потужність:",
+    "powerLimit": "Ліміт:",
+    "efficiency": "Ефективність:",
+    "preset": "Пресет:",
+    "fan": "Кулер",
+    "board": "Плата",
+    "chip": "Чип:",
+    "boardTemp": "Плата:"
+  },
+  "status": {
+    "mining": "МАЙНІНГ",
+    "stopped": "ЗУПИНЕНО",
+    "offline": "ОФЛАЙН",
+    "unknown": "НЕВІДОМО"
+  },
+  "html_texts": {
+    "boards": "Хешборди",
+    "fans": "Кулери",
+    "firmware": "Прошивка",
+    "offlineNote": "Автомат вимкнено — живлення на майнер не подається"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "common": {
+    "title": "ASIC Miner Card",
+    "description": "A Home Assistant card for ASIC miners (hass-miner integration)",
+    "version": "Version"
+  },
+  "config": {
+    "language": "Language",
+    "title": "Title",
+    "prefix": "Sensor prefix",
+    "minerName": "Miner name",
+    "model": "Model (override)",
+    "deviceId": "Device ID (optional)",
+    "webUrl": "Web UI URL (override)",
+    "powerSwitch": "Power switch / breaker (optional)",
+    "decimals": "Hashrate decimals",
+    "tempWarn": "Temp. warning (°C)",
+    "tempCrit": "Temp. critical (°C)",
+    "boardCount": "Hashboards (0 = auto)",
+    "fanCount": "Fans (0 = auto)",
+    "titleAction": "Title click action",
+    "manualAssignment": "Manual entity assignment",
+    "titleShowHide": "Show / Hide zones",
+    "showTitle": "Title",
+    "showButtons": "Buttons",
+    "showMain": "Main",
+    "showFans": "Fans",
+    "showBoards": "Boards",
+    "showCardVersion": "Version",
+    "hashrate": "Hashrate entity",
+    "ideal_hashrate": "Ideal hashrate entity",
+    "temperature": "Temperature entity",
+    "miner_consumption": "Power consumption entity",
+    "power_limit": "Power limit entity",
+    "efficiency": "Efficiency entity",
+    "active_preset_name": "Active preset entity",
+    "active": "Mining switch entity",
+    "device_id": "Device ID"
+  },
+  "buttons": {
+    "mining": "Mining",
+    "pause": "Pause",
+    "resume": "Resume",
+    "power": "Power",
+    "powerOn": "Power on",
+    "webui": "Web UI"
+  },
+  "stats": {
+    "hashrate": "Hashrate:",
+    "idealHashrate": "Ideal:",
+    "temperature": "Temperature:",
+    "power": "Power:",
+    "powerLimit": "Power limit:",
+    "efficiency": "Efficiency:",
+    "preset": "Preset:",
+    "fan": "Fan",
+    "board": "Board",
+    "chip": "Chip:",
+    "boardTemp": "Board:"
+  },
+  "status": {
+    "mining": "MINING",
+    "stopped": "STOPPED",
+    "offline": "OFFLINE",
+    "unknown": "UNKNOWN"
+  },
+  "html_texts": {
+    "boards": "Hashboards",
+    "fans": "Fans",
+    "firmware": "FW",
+    "offlineNote": "The breaker is off — the miner is not powered"
+  }
+}

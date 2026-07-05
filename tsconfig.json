@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "ES2021",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "lib": ["ES2021", "DOM", "DOM.Iterable"],
+        "noEmit": true,
+        "noUnusedParameters": false,
+        "noImplicitReturns": false,
+        "noFallthroughCasesInSwitch": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": false,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "isolatedModules": true
+    },
+    "include": [
+        "src/*",
+        "src/**/*"
+    ]
+}

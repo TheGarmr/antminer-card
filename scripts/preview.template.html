@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ASIC Miner Card — Preview</title>
+<style>
+    :root {
+        --ha-card-background: #1c1c1e;
+        --card-background-color: #1c1c1e;
+        --primary-text-color: #e1e1e1;
+        --secondary-text-color: #9e9e9e;
+        --divider-color: #333;
+        --ha-card-border-color: #333;
+        --ha-card-border-width: 1px;
+    }
+    body {
+        margin: 0;
+        padding: 24px;
+        background: #111113;
+        color: var(--primary-text-color);
+        font-family: Roboto, "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 1.1rem; font-weight: 500; }
+    .toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
+    .toolbar button {
+        background: #26262a; color: #e1e1e1; border: 1px solid #444;
+        border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 0.9rem;
+    }
+    .toolbar button.active { border-color: #ffc107; color: #ffc107; }
+    .cards { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .cards > * { width: 480px; max-width: 100%; }
+    #toast {
+        position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+        background: #26262a; border: 1px solid #444; border-radius: 8px;
+        padding: 8px 16px; font-size: 0.85rem; opacity: 0; transition: opacity .3s;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+<h1>⛏️ ASIC Miner Card — preview build</h1>
+<div class="toolbar">
+    Language:
+    <button data-lang="auto" class="active">auto</button>
+    <button data-lang="en">en</button>
+    <button data-lang="ru">ru</button>
+    <button data-lang="uk">uk</button>
+</div>
+<div class="cards" id="cards"></div>
+<div id="toast"></div>
+
+<script>
+// ---- Home Assistant element mocks ----
+if (!customElements.get('ha-card')) {
+    customElements.define('ha-card', class extends HTMLElement {
+        connectedCallback() {
+            this.style.display = 'block';
+            this.style.background = 'var(--ha-card-background)';
+            this.style.border = '1px solid var(--ha-card-border-color)';
+            this.style.borderRadius = '12px';
+            this.style.padding = '8px';
+            this.style.boxSizing = 'border-box';
+        }
+    });
+}
+if (!customElements.get('ha-icon')) {
+    const GLYPHS = { 'mdi:fan': '✻', 'mdi:open-in-new': '↗', 'mdi:pickaxe': '⛏', 'mdi:pause': '⏸', 'mdi:play': '▶' };
+    // re-render glyph when the icon attribute changes (play <-> pause)
+    customElements.define('ha-icon', class extends HTMLElement {
+        static get observedAttributes() { return ['icon']; }
+        connectedCallback() { this._draw(); }
+        attributeChangedCallback() { this._draw(); }
+        _draw() { this.textContent = GLYPHS[this.getAttribute('icon')] || '•'; }
+    });
+}
+
+// ---- Mock hass ----
+function st(state, unit) {
+    return { state: String(state), attributes: unit ? { unit_of_measurement: unit } : {} };
+}
+
+function minerStates(prefix, spec) {
+    const s = {};
+    s[`sensor.${prefix}_hashrate`] = st(spec.hashrate, spec.hashUnit);
+    if (spec.ideal != null) s[`sensor.${prefix}_ideal_hashrate`] = st(spec.ideal, spec.hashUnit);
+    s[`sensor.${prefix}_temperature`] = st(spec.temp, '°C');
+    if (spec.power != null) s[`sensor.${prefix}_miner_consumption`] = st(spec.power, 'W');
+    if (spec.powerLimit != null) s[`sensor.${prefix}_power_limit`] = st(spec.powerLimit, 'W');
+    if (spec.efficiency != null) s[`sensor.${prefix}_efficiency`] = st(spec.efficiency, 'J/TH');
+    if (spec.preset) s[`sensor.${prefix}_active_preset_name`] = st(spec.preset);
+    s[`switch.${prefix}_active`] = st(spec.active ? 'on' : 'off');
+    if (spec.breaker) s[`switch.${prefix}_breaker`] = st(spec.breaker);
+    (spec.fans || []).forEach((rpm, i) => {
+        s[`sensor.${prefix}_fan_${i}_fan_speed`] = st(rpm, 'RPM');
+    });
+    (spec.boards || []).forEach((b, i) => {
+        s[`sensor.${prefix}_board_${i}_board_temperature`] = st(b[0], '°C');
+        s[`sensor.${prefix}_board_${i}_chip_temperature`] = st(b[1], '°C');
+        s[`sensor.${prefix}_board_${i}_board_hashrate`] = st(b[2], spec.hashUnit);
+    });
+    return s;
+}
+
+// Data taken from real pyasic dumps (examples/*.json) + a synthetic SHA256 miner
+const MINERS = {
+    z15: {
+        hashrate: 402.37, ideal: 420, hashUnit: 'KSol/s', temp: 85,
+        fans: [29760, 0], active: true, breaker: 'on',
+        boards: [[86, 56, 135.0], [84, 55, 120.58], [84, 54, 146.79]],
+        device: { name: 'Z15', manufacturer: 'AntMiner', model: 'Z15', sw_version: 'Stock', configuration_url: 'http://192.168.5.146' },
+    },
+    z11: {
+        hashrate: 141.22, hashUnit: 'KSol/s', temp: 77,
+        fans: [0, 0], active: false, breaker: 'off',
+        boards: [[78, 55, 49.15], [76, 54, 48.49], [76, 55, 43.58]],
+        device: { name: 'Z11', manufacturer: 'AntMiner', model: 'Z11', sw_version: 'Stock', configuration_url: 'http://192.168.5.55' },
+    },
+    s21: {
+        hashrate: 205.34, ideal: 200, hashUnit: 'TH/s', temp: 64,
+        power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default',
+        fans: [5280, 5340, 5460, 5400], active: true,
+        boards: [[58, 64, 68.45], [59, 65, 69.12], [57, 63, 67.77]],
+        device: { name: 'S21', manufacturer: 'AntMiner', model: 'S21', sw_version: 'Stock', configuration_url: 'http://192.168.5.20' },
+    },
+};
+
+const states = {};
+const entities = {};
+const devices = {};
+for (const [prefix, spec] of Object.entries(MINERS)) {
+    Object.assign(states, minerStates(prefix, spec));
+    const deviceId = `${prefix}-device`;
+    devices[deviceId] = spec.device;
+    entities[`sensor.${prefix}_hashrate`] = { device_id: deviceId };
+}
+
+const hass = {
+    states, entities, devices,
+    language: 'en',
+    locale: { language: 'en' },
+};
+
+// more-info dialogs don't exist here — show a toast instead
+document.addEventListener('hass-more-info', (e) => {
+    const toast = document.getElementById('toast');
+    toast.textContent = 'more-info: ' + (e.detail && e.detail.entityId);
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => (toast.style.opacity = '0'), 1500);
+});
+window.__previewHass = hass;
+</script>
+
+<script type="module">
+/*__BUNDLE__*/
+</script>
+
+<script type="module">
+const hass = window.__previewHass;
+const container = document.getElementById('cards');
+const cards = [];
+
+// mock switch toggling so the pause/power buttons work in the preview
+hass.callService = (domain, service, data) => {
+    const id = data && data.entity_id;
+    if (!id || !hass.states[id]) return;
+    let next = null;
+    if (service === 'turn_on') next = 'on';
+    else if (service === 'turn_off') next = 'off';
+    else if (service === 'toggle') next = hass.states[id].state === 'on' ? 'off' : 'on';
+    if (next !== null) {
+        hass.states[id] = { ...hass.states[id], state: next };
+        for (const c of cards) c.el.hass = { ...hass };
+    }
+};
+
+await customElements.whenDefined('asic-miner-card');
+
+function addCard(prefix) {
+    const el = document.createElement('asic-miner-card');
+    const cfg = { prefix };
+    if (hass.states[`switch.${prefix}_breaker`]) cfg.powerSwitch = `switch.${prefix}_breaker`;
+    el.setConfig(cfg);
+    el.hass = hass;
+    container.appendChild(el);
+    cards.push({ el, prefix, cfg });
+}
+
+['z15', 'z11', 's21'].forEach(addCard);
+
+document.querySelectorAll('.toolbar button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.toolbar button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const lang = btn.dataset.lang;
+        for (const c of cards) {
+            c.el.setConfig({ ...c.cfg, language: lang });
+            c.el.hass = { ...hass };
+        }
+    });
+});
+</script>
+</body>
+</html>
