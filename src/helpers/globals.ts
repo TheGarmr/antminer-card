@@ -1,9 +1,9 @@
 import { HomeAssistant } from 'custom-card-helpers';
-import { AsicMinerCardConfig } from '../interfaces';
+import { AntminerCardConfig } from '../interfaces';
 
 export interface GlobalData {
     hass: HomeAssistant | null;
-    cardConfig?: AsicMinerCardConfig;
+    cardConfig?: AntminerCardConfig;
 }
 
 export const globalData: GlobalData = {

@@ -1,7 +1,7 @@
 {
   "common": {
-    "title": "Картка ASIC-майнера",
-    "description": "Картка Home Assistant для ASIC-майнерів (інтеграція hass-miner)",
+    "title": "Antminer Card",
+    "description": "Картка Home Assistant для ASIC-майнерів Antminer (інтеграція hass-miner)",
     "version": "Версія"
   },
   "config": {
@@ -16,7 +16,7 @@
     "decimals": "Знаків після коми (хешрейт)",
     "tempWarn": "Темп. попередження (°C)",
     "tempCrit": "Темп. критична (°C)",
-    "boardCount": "Хешборди (0 = авто)",
+    "boardCount": "Хешплати (0 = авто)",
     "fanCount": "Кулери (0 = авто)",
     "titleAction": "Дія при кліку на заголовок",
     "manualAssignment": "Ручне призначення сутностей",
@@ -34,13 +34,14 @@
     "power_limit": "Сутність ліміту потужності",
     "efficiency": "Сутність ефективності",
     "active_preset_name": "Сутність активного пресету",
+    "cooling_mode": "Сутність режиму охолодження",
     "active": "Перемикач майнінгу",
     "device_id": "ID пристрою"
   },
   "buttons": {
     "mining": "Майніти",
     "pause": "Пауза",
-    "resume": "Старт",
+    "resume": "Поновити",
     "power": "Живлення",
     "powerOn": "Увімкнути живлення",
     "webui": "Веб-інтерфейс"
@@ -53,21 +54,23 @@
     "powerLimit": "Ліміт:",
     "efficiency": "Ефективність:",
     "preset": "Пресет:",
+    "cooling": "Охолодження:",
     "fan": "Кулер",
     "board": "Плата",
     "chip": "Чип:",
     "boardTemp": "Плата:"
   },
   "status": {
-    "mining": "МАЙНІНГ",
-    "stopped": "ЗУПИНЕНО",
+    "mining": "Майнить",
+    "stopped": "Зупинений",
     "offline": "ОФЛАЙН",
     "unknown": "НЕВІДОМО"
   },
   "html_texts": {
-    "boards": "Хешборди",
+    "boards": "Хешплати",
     "fans": "Кулери",
     "firmware": "Прошивка",
-    "offlineNote": "Автомат вимкнено — живлення на майнер не подається"
+    "offlineNote": "Майнер відключений від живлення через автомат",
+    "immersion": "Імерсія"
   }
 }

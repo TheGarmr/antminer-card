@@ -9,9 +9,9 @@ import path from 'path';
 export default {
     input: ['./src/index.ts'],
     output: {
-        file: 'dist/asic-miner-card.js',
+        file: 'dist/antminer-card.js',
         format: 'esm',
-        name: 'AsicMinerCard',
+        name: 'AntminerCard',
         inlineDynamicImports: true,
     },
     watch: {

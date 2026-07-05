@@ -1,15 +1,15 @@
 import { HomeAssistant, navigate as navigatePath } from 'custom-card-helpers';
-import { AsicMinerCardConfig } from '../interfaces';
+import { AntminerCardConfig } from '../interfaces';
 
 export type EntityDomain = 'sensor' | 'switch' | 'number' | 'binary_sensor';
 
 const isFullEntityId = (value: string) => value.includes('.');
 
-const prefixedEntityId = (config: AsicMinerCardConfig, suffix: string, type: EntityDomain) =>
+const prefixedEntityId = (config: AntminerCardConfig, suffix: string, type: EntityDomain) =>
     `${type}.${config?.prefix}_${suffix}`;
 
 const candidateEntityIds = (
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     type: EntityDomain
 ): string[] => {
@@ -28,7 +28,7 @@ const candidateEntityIds = (
 
 export const resolveEntity = (
     hass: HomeAssistant,
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     type: EntityDomain = 'sensor'
 ) => {
@@ -41,7 +41,7 @@ export const resolveEntity = (
 
 export const resolveEntityId = (
     hass: HomeAssistant,
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     type: EntityDomain = 'sensor'
 ): string | undefined =>
@@ -49,7 +49,7 @@ export const resolveEntityId = (
 
 export const getState = (
     hass: HomeAssistant,
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     precision: number = 2,
     defaultValue = '',
@@ -69,7 +69,7 @@ export const getState = (
 
 export const getUnit = (
     hass: HomeAssistant,
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     type: EntityDomain = 'sensor'
 ): string => {
@@ -94,7 +94,7 @@ export function fireEvent(node: HTMLElement, type: string, detail: any, options?
 
 export const navigate = (
     event,
-    config: AsicMinerCardConfig,
+    config: AntminerCardConfig,
     entityKey: string,
     type: EntityDomain = 'sensor',
     hass?: HomeAssistant
@@ -111,7 +111,7 @@ export const navigate = (
     event.target.dispatchEvent(customEvent);
 };
 
-export const getDeviceId = (hass: HomeAssistant, config: AsicMinerCardConfig): string | undefined => {
+export const getDeviceId = (hass: HomeAssistant, config: AntminerCardConfig): string | undefined => {
     const configured = config?.deviceId?.trim() || config?.entities?.device_id?.toString()?.trim();
     if (configured) return configured;
 
@@ -126,19 +126,19 @@ export const getDeviceId = (hass: HomeAssistant, config: AsicMinerCardConfig): s
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getDevice = (hass: HomeAssistant, config: AsicMinerCardConfig): any => {
+export const getDevice = (hass: HomeAssistant, config: AntminerCardConfig): any => {
     const deviceId = getDeviceId(hass, config);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return deviceId ? (hass as any)?.devices?.[deviceId] : undefined;
 };
 
-export const getWebUrl = (hass: HomeAssistant, config: AsicMinerCardConfig): string | undefined => {
+export const getWebUrl = (hass: HomeAssistant, config: AntminerCardConfig): string | undefined => {
     const configured = config?.webUrl?.trim();
     if (configured) return configured;
     return getDevice(hass, config)?.configuration_url ?? undefined;
 };
 
-export const navigateTitle = (event, hass: HomeAssistant, config: AsicMinerCardConfig) => {
+export const navigateTitle = (event, hass: HomeAssistant, config: AntminerCardConfig) => {
     if (config?.titleAction !== 'device') {
         navigate(event, config, 'hashrate', 'sensor', hass);
         return;

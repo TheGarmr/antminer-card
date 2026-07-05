@@ -1,5 +1,5 @@
 {
-  "name": "ASIC Miner Card",
-  "filename": "asic-miner-card.js",
+  "name": "Antminer Card",
+  "filename": "antminer-card.js",
   "render_readme": true
 }

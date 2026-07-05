@@ -1,12 +1,13 @@
-# ASIC Miner Card
+# Antminer Card
 
-A customizable Home Assistant Lovelace card for ASIC miners, designed for the [hass-miner](https://github.com/Schnitzel/hass-miner) integration. Visual style inspired by [jk-bms-card](https://github.com/Pho3niX90/jk-bms-card).
+A customizable Home Assistant Lovelace card for Antminer ASIC miners, designed for the [hass-miner](https://github.com/Schnitzel/hass-miner) integration. Visual style inspired by [jk-bms-card](https://github.com/Pho3niX90/jk-bms-card).
 
 ## Features
 
 - Current hashrate with automatic unit (TH/s for SHA256, KSol/s for Equihash)
 - Average temperature with configurable warning/critical thresholds
-- Fan speeds (auto-detected, hidden when the miner has no fan sensors)
+- Fan speeds (auto-detected, hidden when the miner has no fan sensors or uses immersion cooling — `sensor.<prefix>_cooling_mode` = `immersion`)
+- Optional external power switch/breaker: power button on the card, collapsed OFFLINE view when the breaker is off
 - Miner model, firmware and mining status in the header (from the HA device registry)
 - Web UI button — opens the miner's web interface (`configuration_url` from the device, with manual override)
 - Optional per-hashboard breakdown (board temp, chip temp, board hashrate)
@@ -18,25 +19,26 @@ A customizable Home Assistant Lovelace card for ASIC miners, designed for the [h
 ### HACS (recommended)
 
 1. HACS → three-dot menu → **Custom repositories**
-2. Repository: `https://github.com/<your-username>/asic-miner-card`, type: **Dashboard**
-3. Install "ASIC Miner Card" and reload the browser. HACS registers the resource automatically.
+2. Repository: `https://github.com/<your-username>/antminer-card`, type: **Dashboard**
+3. Install "Antminer Card" and reload the browser. HACS registers the resource automatically.
 
 ### Manual
 
-1. Copy `dist/asic-miner-card.js` to `config/www/` on your Home Assistant instance.
+1. Copy `dist/antminer-card.js` to `config/www/` on your Home Assistant instance.
 2. Add the resource: Settings → Dashboards → Resources → Add resource
-   - URL: `/local/asic-miner-card.js`
+   - URL: `/local/antminer-card.js`
    - Type: JavaScript module
-3. Add the card to a dashboard: search for "ASIC Miner Card".
+3. Add the card to a dashboard: search for "Antminer Card".
 
 ## Configuration
 
 Everything can be configured through the visual editor. YAML example:
 
 ```yaml
-type: custom:asic-miner-card
+type: custom:antminer-card
 prefix: z15            # entity prefix: sensor.z15_hashrate, switch.z15_active, ...
 language: auto         # auto | en | ru | uk
+powerSwitch: switch.miner_breaker  # optional: breaker in front of the miner
 tempWarn: 85
 tempCrit: 95
 decimals: 2
@@ -66,5 +68,5 @@ showFans: true
 
 ```bash
 npm install
-npm run build   # outputs dist/asic-miner-card.js
+npm run build   # outputs dist/antminer-card.js + dist/preview.html
 ```

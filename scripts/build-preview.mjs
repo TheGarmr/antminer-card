@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const bundle = readFileSync(join(root, 'dist', 'asic-miner-card.js'), 'utf8')
+const bundle = readFileSync(join(root, 'dist', 'antminer-card.js'), 'utf8')
     // keep inline <script> parsing safe
     .replace(/<\/script>/g, '<\\/script>');
 

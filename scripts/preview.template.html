@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ASIC Miner Card — Preview</title>
+<title>Antminer Card — Preview</title>
 <style>
     :root {
         --ha-card-background: #1c1c1e;
@@ -38,7 +38,7 @@
 </style>
 </head>
 <body>
-<h1>⛏️ ASIC Miner Card — preview build</h1>
+<h1>⛏️ Antminer Card — preview build</h1>
 <div class="toolbar">
     Language:
     <button data-lang="auto" class="active">auto</button>
@@ -88,6 +88,7 @@ function minerStates(prefix, spec) {
     if (spec.powerLimit != null) s[`sensor.${prefix}_power_limit`] = st(spec.powerLimit, 'W');
     if (spec.efficiency != null) s[`sensor.${prefix}_efficiency`] = st(spec.efficiency, 'J/TH');
     if (spec.preset) s[`sensor.${prefix}_active_preset_name`] = st(spec.preset);
+    if (spec.cooling) s[`sensor.${prefix}_cooling_mode`] = st(spec.cooling);
     s[`switch.${prefix}_active`] = st(spec.active ? 'on' : 'off');
     if (spec.breaker) s[`switch.${prefix}_breaker`] = st(spec.breaker);
     (spec.fans || []).forEach((rpm, i) => {
@@ -118,6 +119,7 @@ const MINERS = {
     s21: {
         hashrate: 205.34, ideal: 200, hashUnit: 'TH/s', temp: 64,
         power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default',
+        cooling: 'immersion',
         fans: [5280, 5340, 5460, 5400], active: true,
         boards: [[58, 64, 68.45], [59, 65, 69.12], [57, 63, 67.77]],
         device: { name: 'S21', manufacturer: 'AntMiner', model: 'S21', sw_version: 'Stock', configuration_url: 'http://192.168.5.20' },
@@ -174,10 +176,10 @@ hass.callService = (domain, service, data) => {
     }
 };
 
-await customElements.whenDefined('asic-miner-card');
+await customElements.whenDefined('antminer-card');
 
 function addCard(prefix) {
-    const el = document.createElement('asic-miner-card');
+    const el = document.createElement('antminer-card');
     const cfg = { prefix };
     if (hass.states[`switch.${prefix}_breaker`]) cfg.powerSwitch = `switch.${prefix}_breaker`;
     el.setConfig(cfg);

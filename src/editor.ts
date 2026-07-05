@@ -2,14 +2,14 @@ import { HomeAssistant, LovelaceCardEditor, LovelaceConfig } from 'custom-card-h
 import { html, LitElement, TemplateResult, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { EDITOR_NAME, EntityKey } from './const';
-import { AsicMinerCardConfig } from './interfaces';
+import { AntminerCardConfig } from './interfaces';
 import { localize } from './localize/localize';
 import { fireEvent } from './helpers/utils';
 
 @customElement(EDITOR_NAME)
-export class AsicMinerCardEditor extends LitElement implements LovelaceCardEditor {
+export class AntminerCardEditor extends LitElement implements LovelaceCardEditor {
     @property() public hass!: HomeAssistant;
-    @property() private _config!: AsicMinerCardConfig;
+    @property() private _config!: AntminerCardConfig;
     @property() lovelace?: LovelaceConfig;
 
     static get styles() {
@@ -32,11 +32,11 @@ export class AsicMinerCardEditor extends LitElement implements LovelaceCardEdito
         `;
     }
 
-    public setConfig(config: AsicMinerCardConfig): void {
+    public setConfig(config: AntminerCardConfig): void {
         this._config = { ...config };
     }
 
-    private renderBoolean(label: string, configKey: keyof AsicMinerCardConfig) {
+    private renderBoolean(label: string, configKey: keyof AntminerCardConfig) {
         return html`
             <div class="boolean-row">
                 <span class="label">${label}</span>
@@ -48,7 +48,7 @@ export class AsicMinerCardEditor extends LitElement implements LovelaceCardEdito
         `;
     }
 
-    private _handleSwitchChange(key: keyof AsicMinerCardConfig, ev: Event): void {
+    private _handleSwitchChange(key: keyof AntminerCardConfig, ev: Event): void {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const target = ev.target as any;
         const config = { ...this._config! };

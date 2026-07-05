@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import { EDITOR_NAME, EntityKey, MAIN_NAME } from './const';
-import { AsicMinerCardConfig } from './interfaces';
+import { AntminerCardConfig } from './interfaces';
 import { localize } from './localize/localize';
 
 import { version } from '../package.json';
@@ -12,19 +12,19 @@ import './layouts/default';
 export const CARD_VERSION = version;
 
 console.groupCollapsed(
-    `%c⛏️ ASIC Miner Card%c   ready!  🚀 (v${CARD_VERSION})`,
+    `%c⛏️ Antminer Card%c   ready!  🚀 (v${CARD_VERSION})`,
     'background: linear-gradient(to right, #ffc107, #42a5f5); color: black; font-weight: bold; padding: 2px 8px; border-radius: 6px;',
     'background: none; color: #AAA; font-style: italic;'
 );
 console.groupEnd();
 
 @customElement(MAIN_NAME)
-export class AsicMinerCard extends LitElement {
+export class AntminerCard extends LitElement {
     @property() public hass!: HomeAssistant;
-    @property() private _config?: AsicMinerCardConfig;
+    @property() private _config?: AntminerCardConfig;
 
-    public setConfig(config: AsicMinerCardConfig): void {
-        this._config = AsicMinerCard.getStubConfig();
+    public setConfig(config: AntminerCardConfig): void {
+        this._config = AntminerCard.getStubConfig();
         this._config = { ...this._config, ...config };
         globalData.cardConfig = this._config;
     }
@@ -54,7 +54,7 @@ export class AsicMinerCard extends LitElement {
                 acc[key as EntityKey] = '';
                 return acc;
             }, {} as Record<EntityKey, string>),
-        } as unknown as AsicMinerCardConfig;
+        } as unknown as AntminerCardConfig;
     }
 
     public static async getConfigElement() {
@@ -79,7 +79,7 @@ export class AsicMinerCard extends LitElement {
         if (!this.hass || !this._config) return html``;
 
         return html`
-            <asic-miner-default-layout .hass=${this.hass} .config=${this._config}></asic-miner-default-layout>
+            <antminer-default-layout .hass=${this.hass} .config=${this._config}></antminer-default-layout>
         `;
     }
 }
@@ -89,7 +89,7 @@ export class AsicMinerCard extends LitElement {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).customCards.push({
     type: MAIN_NAME,
-    name: 'ASIC Miner Card',
+    name: 'Antminer Card',
     preview: true,
     description: localize('common.description'),
     configurable: true,

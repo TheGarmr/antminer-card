@@ -1,7 +1,7 @@
 {
   "common": {
-    "title": "ASIC Miner Card",
-    "description": "A Home Assistant card for ASIC miners (hass-miner integration)",
+    "title": "Antminer Card",
+    "description": "A Home Assistant card for Antminer ASIC miners (hass-miner integration)",
     "version": "Version"
   },
   "config": {
@@ -34,6 +34,7 @@
     "power_limit": "Power limit entity",
     "efficiency": "Efficiency entity",
     "active_preset_name": "Active preset entity",
+    "cooling_mode": "Cooling mode entity",
     "active": "Mining switch entity",
     "device_id": "Device ID"
   },
@@ -53,6 +54,7 @@
     "powerLimit": "Power limit:",
     "efficiency": "Efficiency:",
     "preset": "Preset:",
+    "cooling": "Cooling:",
     "fan": "Fan",
     "board": "Board",
     "chip": "Chip:",
@@ -68,6 +70,7 @@
     "boards": "Hashboards",
     "fans": "Fans",
     "firmware": "FW",
-    "offlineNote": "The breaker is off — the miner is not powered"
+    "offlineNote": "The breaker is off — the miner is not powered",
+    "immersion": "Immersion"
   }
 }

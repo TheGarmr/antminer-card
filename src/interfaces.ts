@@ -3,7 +3,7 @@ import { EntityKey } from './const';
 
 type ExtraEntityKey = 'device_id';
 
-export interface AsicMinerCardConfig extends LovelaceCardConfig {
+export interface AntminerCardConfig extends LovelaceCardConfig {
     language?: string;
     title?: string;
     prefix: string; // The entity prefix (e.g. "z15" for sensor.z15_hashrate)

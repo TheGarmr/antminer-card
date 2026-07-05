@@ -1,7 +1,7 @@
 import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
-import { AsicMinerCardConfig } from '../interfaces';
+import { AntminerCardConfig } from '../interfaces';
 import { localize } from '../localize/localize';
 import { globalData } from '../helpers/globals';
 import {
@@ -17,10 +17,10 @@ import {
 import { MAX_BOARDS, MAX_FANS } from '../const';
 import { version } from '../../package.json';
 
-@customElement('asic-miner-default-layout')
-export class AsicMinerDefaultLayout extends LitElement {
+@customElement('antminer-default-layout')
+export class AntminerDefaultLayout extends LitElement {
     @property() public hass!: HomeAssistant;
-    @property() public config!: AsicMinerCardConfig;
+    @property() public config!: AntminerCardConfig;
 
     VERSION = version;
 
@@ -345,7 +345,13 @@ export class AsicMinerDefaultLayout extends LitElement {
         `;
     }
 
+    // Immersion cooling: sensor.<prefix>_cooling_mode == "immersion" — no fans to show
+    private _isImmersion(): boolean {
+        return this.getState('cooling_mode', 0, '').toLowerCase() === 'immersion';
+    }
+
     private _renderFans(): TemplateResult {
+        if (this._isImmersion()) return html``;
         const count = this.detectCount('fan');
         if (!count) return html``;
 
@@ -540,6 +546,10 @@ export class AsicMinerDefaultLayout extends LitElement {
                     ${powerLimit !== '' && parseFloat(powerLimit) > 0 ? html`
                     <div class="data-row"><span class="name" title="${localize('stats.powerLimit')}">${localize('stats.powerLimit')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'power_limit')}>${powerLimit} W</span>
+                    </div>` : ''}
+                    ${this._isImmersion() ? html`
+                    <div class="data-row"><span class="name" title="${localize('stats.cooling')}">${localize('stats.cooling')}</span>
+                        <span class="label clickable accent-blue" @click=${(e) => this._navigate(e, 'cooling_mode')}>${localize('html_texts.immersion')}</span>
                     </div>` : ''}
                     ${showFans ? this._renderFans() : ''}
                 </div>

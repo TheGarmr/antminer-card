@@ -1,8 +1,8 @@
 {
-  "name": "asic-miner-card",
-  "version": "1.0.0",
-  "description": "A customizable Home Assistant card for ASIC miners (hass-miner integration).",
-  "main": "dist/asic-miner-card.js",
+  "name": "antminer-card",
+  "version": "1.0.1",
+  "description": "A customizable Home Assistant card for Antminer ASIC miners (hass-miner integration).",
+  "main": "dist/antminer-card.js",
   "scripts": {
     "rollup": "rollup -c",
     "build": "rollup -c --bundleConfigAsCjs && node scripts/build-preview.mjs",
