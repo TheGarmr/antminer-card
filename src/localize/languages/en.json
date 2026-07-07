@@ -17,14 +17,14 @@
     "tempWarn": "Temp. warning (°C)",
     "tempCrit": "Temp. critical (°C)",
     "boardCount": "Hashboards (0 = auto)",
-    "fanCount": "Fans (0 = auto)",
+    "fanCount": "Cooling (0 = auto)",
     "titleAction": "Title click action",
     "manualAssignment": "Manual entity assignment",
     "titleShowHide": "Show / Hide zones",
     "showTitle": "Title",
     "showButtons": "Buttons",
     "showMain": "Main",
-    "showFans": "Fans",
+    "showFans": "Cooling",
     "showBoards": "Boards",
     "showCardVersion": "Version",
     "hashrate": "Hashrate entity",
@@ -56,6 +56,9 @@
     "preset": "Preset:",
     "cooling": "Cooling:",
     "fan": "Fan",
+    "block": "Block",
+    "inlet": "Inlet",
+    "outlet": "Outlet",
     "board": "Board",
     "chip": "Chip:",
     "boardTemp": "Board:"
@@ -63,14 +66,16 @@
   "status": {
     "mining": "MINING",
     "stopped": "STOPPED",
+    "powerOff": "POWER OFF",
     "offline": "OFFLINE",
     "unknown": "UNKNOWN"
   },
   "html_texts": {
     "boards": "Hashboards",
-    "fans": "Fans",
+    "fans": "Cooling",
     "firmware": "FW",
-    "offlineNote": "The breaker is off — the miner is not powered",
-    "immersion": "Immersion"
+    "offlineNote": "The miner is offline",
+    "breakerOffNote": "The miner is powered off by the breaker",
+    "breakerUnavailableNote": "Breaker state is unavailable. Power control is blocked"
   }
 }

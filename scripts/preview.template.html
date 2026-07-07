@@ -64,7 +64,7 @@ if (!customElements.get('ha-card')) {
     });
 }
 if (!customElements.get('ha-icon')) {
-    const GLYPHS = { 'mdi:fan': '✻', 'mdi:open-in-new': '↗', 'mdi:pickaxe': '⛏', 'mdi:pause': '⏸', 'mdi:play': '▶' };
+    const GLYPHS = { 'mdi:fan': '✻', 'mdi:water': '💧', 'mdi:open-in-new': '↗', 'mdi:pickaxe': '⛏', 'mdi:pause': '⏸', 'mdi:play': '▶' };
     // re-render glyph when the icon attribute changes (play <-> pause)
     customElements.define('ha-icon', class extends HTMLElement {
         static get observedAttributes() { return ['icon']; }
@@ -79,25 +79,35 @@ function st(state, unit) {
     return { state: String(state), attributes: unit ? { unit_of_measurement: unit } : {} };
 }
 
+function unavailable(unit) {
+    return { state: 'unavailable', attributes: unit ? { unit_of_measurement: unit } : {} };
+}
+
 function minerStates(prefix, spec) {
     const s = {};
-    s[`sensor.${prefix}_hashrate`] = st(spec.hashrate, spec.hashUnit);
-    if (spec.ideal != null) s[`sensor.${prefix}_ideal_hashrate`] = st(spec.ideal, spec.hashUnit);
-    s[`sensor.${prefix}_temperature`] = st(spec.temp, '°C');
-    if (spec.power != null) s[`sensor.${prefix}_miner_consumption`] = st(spec.power, 'W');
+    s[`sensor.${prefix}_hashrate`] = spec.unavailable ? unavailable(spec.hashUnit) : st(spec.hashrate, spec.hashUnit);
+    if (spec.ideal != null) s[`sensor.${prefix}_ideal_hashrate`] = spec.unavailable ? unavailable(spec.hashUnit) : st(spec.ideal, spec.hashUnit);
+    s[`sensor.${prefix}_temperature`] = spec.unavailable ? unavailable('°C') : st(spec.temp, '°C');
+    if (spec.power != null) s[`sensor.${prefix}_miner_consumption`] = spec.unavailable ? unavailable('W') : st(spec.power, 'W');
     if (spec.powerLimit != null) s[`sensor.${prefix}_power_limit`] = st(spec.powerLimit, 'W');
     if (spec.efficiency != null) s[`sensor.${prefix}_efficiency`] = st(spec.efficiency, 'J/TH');
     if (spec.preset) s[`sensor.${prefix}_active_preset_name`] = st(spec.preset);
     if (spec.cooling) s[`sensor.${prefix}_cooling_mode`] = st(spec.cooling);
-    s[`switch.${prefix}_active`] = st(spec.active ? 'on' : 'off');
+    s[`switch.${prefix}_active`] = st(spec.unavailable ? 'unavailable' : spec.active ? 'on' : 'off');
     if (spec.breaker) s[`switch.${prefix}_breaker`] = st(spec.breaker);
     (spec.fans || []).forEach((rpm, i) => {
         s[`sensor.${prefix}_fan_${i}_fan_speed`] = st(rpm, 'RPM');
+    });
+    (spec.waterBlocks || []).forEach((b, i) => {
+        s[`sensor.${prefix}_board_${i}_inlet_water_temperature`] = st(b[0], '°C');
+        s[`sensor.${prefix}_board_${i}_outlet_water_temperature`] = st(b[1], '°C');
+        s[`sensor.${prefix}_board_${i}_water_temperature_delta`] = st(b[1] - b[0], '°C');
     });
     (spec.boards || []).forEach((b, i) => {
         s[`sensor.${prefix}_board_${i}_board_temperature`] = st(b[0], '°C');
         s[`sensor.${prefix}_board_${i}_chip_temperature`] = st(b[1], '°C');
         s[`sensor.${prefix}_board_${i}_board_hashrate`] = st(b[2], spec.hashUnit);
+        if (b[3] != null) s[`sensor.${prefix}_board_${i}_board_voltage`] = st(b[3], 'V');
     });
     return s;
 }
@@ -107,22 +117,27 @@ const MINERS = {
     z15: {
         hashrate: 402.37, ideal: 420, hashUnit: 'KSol/s', temp: 85,
         fans: [29760, 0], active: true, breaker: 'on',
-        boards: [[86, 56, 135.0], [84, 55, 120.58], [84, 54, 146.79]],
+        boards: [[86, 56, 135.0, 12.1], [84, 55, 120.58, 12.0], [84, 54, 146.79, 12.2]],
         device: { name: 'Z15', manufacturer: 'AntMiner', model: 'Z15', sw_version: 'Stock', configuration_url: 'http://192.168.5.146' },
     },
     z11: {
         hashrate: 141.22, hashUnit: 'KSol/s', temp: 77,
         fans: [0, 0], active: false, breaker: 'off',
-        boards: [[78, 55, 49.15], [76, 54, 48.49], [76, 55, 43.58]],
+        boards: [[78, 55, 49.15, 12.0], [76, 54, 48.49, 12.1], [76, 55, 43.58, 12.0]],
         device: { name: 'Z11', manufacturer: 'AntMiner', model: 'Z11', sw_version: 'Stock', configuration_url: 'http://192.168.5.55' },
     },
     s21: {
         hashrate: 205.34, ideal: 200, hashUnit: 'TH/s', temp: 64,
         power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default',
         cooling: 'immersion',
-        fans: [5280, 5340, 5460, 5400], active: true,
-        boards: [[58, 64, 68.45], [59, 65, 69.12], [57, 63, 67.77]],
+        waterBlocks: [[34, 45], [34, 46], [34, 45]], active: true,
+        boards: [[58, 64, 68.45, 21.08], [59, 65, 69.12, 21.15], [57, 63, 67.77, 21.04]],
         device: { name: 'S21', manufacturer: 'AntMiner', model: 'S21', sw_version: 'Stock', configuration_url: 'http://192.168.5.20' },
+    },
+    s21_offline: {
+        hashrate: 0, hashUnit: 'TH/s', temp: 0, power: 0,
+        unavailable: true, active: false,
+        device: { name: 'S21 Offline', manufacturer: 'AntMiner', model: 'S21+ Hydro', sw_version: 'VNish', configuration_url: 'http://192.168.5.21' },
     },
 };
 
@@ -188,7 +203,7 @@ function addCard(prefix) {
     cards.push({ el, prefix, cfg });
 }
 
-['z15', 'z11', 's21'].forEach(addCard);
+['z15', 'z11', 's21', 's21_offline'].forEach(addCard);
 
 document.querySelectorAll('.toolbar button').forEach((btn) => {
     btn.addEventListener('click', () => {

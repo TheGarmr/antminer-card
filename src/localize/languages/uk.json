@@ -17,14 +17,14 @@
     "tempWarn": "Темп. попередження (°C)",
     "tempCrit": "Темп. критична (°C)",
     "boardCount": "Хешплати (0 = авто)",
-    "fanCount": "Кулери (0 = авто)",
+    "fanCount": "Охолодження (0 = авто)",
     "titleAction": "Дія при кліку на заголовок",
     "manualAssignment": "Ручне призначення сутностей",
     "titleShowHide": "Показати / Сховати зони",
     "showTitle": "Заголовок",
     "showButtons": "Кнопки",
     "showMain": "Основне",
-    "showFans": "Кулери",
+    "showFans": "Охолодження",
     "showBoards": "Плати",
     "showCardVersion": "Версія",
     "hashrate": "Сутність хешрейту",
@@ -55,7 +55,10 @@
     "efficiency": "Ефективність:",
     "preset": "Пресет:",
     "cooling": "Охолодження:",
-    "fan": "Кулер",
+    "fan": "Вентилятор",
+    "block": "Блок",
+    "inlet": "Вхід",
+    "outlet": "Вихід",
     "board": "Плата",
     "chip": "Чип:",
     "boardTemp": "Плата:"
@@ -63,14 +66,16 @@
   "status": {
     "mining": "Майнить",
     "stopped": "Зупинений",
+    "powerOff": "ВИМКНЕНО",
     "offline": "ОФЛАЙН",
     "unknown": "НЕВІДОМО"
   },
   "html_texts": {
     "boards": "Хешплати",
-    "fans": "Кулери",
+    "fans": "Охолодження",
     "firmware": "Прошивка",
-    "offlineNote": "Майнер відключений від живлення через автомат",
-    "immersion": "Імерсія"
+    "offlineNote": "Майнер офлайн",
+    "breakerOffNote": "Майнер вимкнений через автомат",
+    "breakerUnavailableNote": "Автомат недоступний. Керування живленням заблоковано"
   }
 }

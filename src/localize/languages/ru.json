@@ -17,14 +17,14 @@
     "tempWarn": "Темп. предупреждение (°C)",
     "tempCrit": "Темп. критическая (°C)",
     "boardCount": "Хешплаты (0 = авто)",
-    "fanCount": "Кулеры (0 = авто)",
+    "fanCount": "Охлаждение (0 = авто)",
     "titleAction": "Действие по клику на заголовок",
     "manualAssignment": "Ручное назначение сущностей",
     "titleShowHide": "Показать / Скрыть зоны",
     "showTitle": "Заголовок",
     "showButtons": "Кнопки",
     "showMain": "Основное",
-    "showFans": "Кулеры",
+    "showFans": "Охлаждение",
     "showBoards": "Платы",
     "showCardVersion": "Версия",
     "hashrate": "Сущность хешрейта",
@@ -55,7 +55,10 @@
     "efficiency": "Эффективность:",
     "preset": "Пресет:",
     "cooling": "Охлаждение:",
-    "fan": "Кулер",
+    "fan": "Вентилятор",
+    "block": "Блок",
+    "inlet": "Вход",
+    "outlet": "Выход",
     "board": "Плата",
     "chip": "Чип:",
     "boardTemp": "Плата:"
@@ -63,14 +66,16 @@
   "status": {
     "mining": "Майнит",
     "stopped": "Пауза",
+    "powerOff": "ВЫКЛЮЧЕН",
     "offline": "ОФФЛАЙН",
     "unknown": "НЕИЗВЕСТНО"
   },
   "html_texts": {
     "boards": "Хешплаты",
-    "fans": "Кулеры",
+    "fans": "Охлаждение",
     "firmware": "Прошивка",
-    "offlineNote": "Майнер отключен через автомат",
-    "immersion": "Иммерсия"
+    "offlineNote": "Майнер офлайн",
+    "breakerOffNote": "Майнер выключен через автомат",
+    "breakerUnavailableNote": "Автомат недоступен. Управление питанием заблокировано"
   }
 }

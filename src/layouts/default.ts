@@ -17,6 +17,8 @@ import {
 import { MAX_BOARDS, MAX_FANS } from '../const';
 import { version } from '../../package.json';
 
+type OfflineReason = 'breaker_off' | 'miner_unavailable';
+
 @customElement('antminer-default-layout')
 export class AntminerDefaultLayout extends LitElement {
     @property() public hass!: HomeAssistant;
@@ -93,6 +95,13 @@ export class AntminerDefaultLayout extends LitElement {
             flex: 1 1 auto;
         }
 
+        .data-row .icon-name {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
         .label {
             font-size: clamp(0.68rem, round(20cqi + 0.2rem, 0.1rem), 1rem) !important;
             white-space: nowrap;
@@ -160,6 +169,15 @@ export class AntminerDefaultLayout extends LitElement {
             border-color: var(--amc-yellow);
         }
 
+        .button-disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        .button-disabled:hover {
+            border-color: var(--ha-card-border-color, var(--divider-color, #e0e0e0));
+        }
+
         .webui {
             color: var(--amc-blue);
         }
@@ -187,14 +205,74 @@ export class AntminerDefaultLayout extends LitElement {
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 8px 12px;
             padding: 0.35rem 0.75rem;
             min-width: 0;
+        }
+
+        .board-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .metric-svg {
+            width: 16px;
+            height: 16px;
+            flex: 0 0 16px;
+            color: var(--secondary-text-color, #808080);
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .metric-svg-fill {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .metric-svg-voltage {
+            color: var(--amc-yellow);
+            fill: currentColor;
+            stroke: none;
         }
 
         .fan-icon {
             --mdc-icon-size: 16px;
             vertical-align: text-bottom;
+        }
+
+        .water-icon {
+            --mdc-icon-size: 16px;
+            vertical-align: text-bottom;
+            color: var(--amc-blue);
+        }
+
+        .water-value {
+            display: inline-flex;
+            justify-content: flex-end;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 4px;
+            white-space: normal;
+            text-align: right;
+        }
+
+        .water-temp {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .flow-arrow {
+            color: var(--amc-blue);
+            font-weight: 700;
+        }
+
+        .delta {
+            color: var(--secondary-text-color, #808080);
         }
 
         .webui-icon {
@@ -244,6 +322,70 @@ export class AntminerDefaultLayout extends LitElement {
         return getUnit(this.hass, this.config, entityKey);
     }
 
+    private _entityState(entityKey: string, type: 'sensor' | 'switch' | 'number' = 'sensor'): string | null {
+        return resolveEntity(this.hass, this.config, entityKey, type)?.state ?? null;
+    }
+
+    private _isUnavailableState(state: string | null): boolean {
+        return state === null || state === '' || state === 'unavailable' || state === 'unknown';
+    }
+
+    private _numericEntityState(entityKey: string, type: 'sensor' | 'switch' | 'number' = 'sensor'): number | null {
+        const state = this._entityState(entityKey, type);
+        if (this._isUnavailableState(state)) return null;
+        const value = Number(state);
+        return Number.isFinite(value) ? value : null;
+    }
+
+    private _minerEntitiesUnavailable(): boolean {
+        const states = ['hashrate', 'temperature', 'miner_consumption']
+            .map((key) => this._entityState(key))
+            .filter((state): state is string => state !== null);
+
+        return states.length > 0 && states.every((state) => this._isUnavailableState(state));
+    }
+
+    private _hasPositiveRuntimeTelemetry(): boolean {
+        const directKeys = ['temperature', 'miner_consumption'];
+        if (directKeys.some((key) => (this._numericEntityState(key) ?? 0) > 0)) return true;
+
+        for (let i = 0; i < MAX_FANS; i++) {
+            if ((this._numericEntityState(`fan_${i}_fan_speed`) ?? 0) > 0) return true;
+        }
+
+        for (let i = 0; i < MAX_BOARDS; i++) {
+            const boardKeys = [
+                `board_${i}_board_temperature`,
+                `board_${i}_chip_temperature`,
+                `board_${i}_board_hashrate`,
+                `board_${i}_board_power`,
+                `board_${i}_inlet_water_temperature`,
+                `board_${i}_outlet_water_temperature`,
+            ];
+            if (boardKeys.some((key) => (this._numericEntityState(key) ?? 0) > 0)) return true;
+        }
+
+        return false;
+    }
+
+    private _minerTelemetryLost(): boolean {
+        const activeState = this._entityState('active', 'switch');
+        if (activeState === 'on') return false;
+
+        const hashrateState = this._entityState('hashrate');
+        const hashrate = this._numericEntityState('hashrate');
+        const hasNoHashrate = this._isUnavailableState(hashrateState)
+            || (hashrate !== null && hashrate <= 0);
+
+        return hasNoHashrate && !this._hasPositiveRuntimeTelemetry();
+    }
+
+    private _offlineReason(): OfflineReason | null {
+        if (this._powerState() === 'off') return 'breaker_off';
+        if (this._minerEntitiesUnavailable() || this._minerTelemetryLost()) return 'miner_unavailable';
+        return null;
+    }
+
     private detectCount(family: 'board' | 'fan'): number {
         const configured = family === 'board' ? this.config.boardCount : this.config.fanCount;
         if (configured && configured > 0) return configured;
@@ -286,22 +428,35 @@ export class AntminerDefaultLayout extends LitElement {
         return this.hass?.states[id]?.state ?? null;
     }
 
+    private _powerControlDisabled(): boolean {
+        const id = this._powerEntityId();
+        if (!id) return false;
+        const state = this._powerState();
+        return state !== 'on' && state !== 'off';
+    }
+
     private _togglePower(event) {
         event?.stopPropagation();
         const id = this._powerEntityId();
-        if (!id) return;
+        if (!id || this._powerControlDisabled()) return;
         this.hass.callService('homeassistant', 'toggle', { entity_id: id });
     }
 
-    private _renderPowerButton(): TemplateResult {
+    private _renderPowerButton(labelKey = 'buttons.power'): TemplateResult {
         const id = this._powerEntityId();
         if (!id) return html``;
         const state = this._powerState();
+        const disabled = this._powerControlDisabled();
         const colorClass = state === 'on' ? 'status-on' : state === 'off' ? 'status-off' : 'status-unknown';
         return html`
-            <div class="button-border button-padding center clickable" title="${id}" @click=${(e) => this._togglePower(e)}>
+            <div
+                class="button-border button-padding center ${disabled ? 'button-disabled' : 'clickable'}"
+                title="${disabled ? localize('html_texts.breakerUnavailableNote') : id}"
+                aria-disabled="${disabled ? 'true' : 'false'}"
+                @click=${(e) => this._togglePower(e)}
+            >
                 <ha-icon class="webui-icon" icon="mdi:power"></ha-icon>
-                <span class="${colorClass}">${localize('buttons.power')}</span>
+                <span class="${colorClass}">${localize(labelKey)}</span>
             </div>
         `;
     }
@@ -345,13 +500,13 @@ export class AntminerDefaultLayout extends LitElement {
         `;
     }
 
-    // Immersion cooling: sensor.<prefix>_cooling_mode == "immersion" — no fans to show
+    // Water cooling uses board inlet/outlet temperature sensors instead of fans.
     private _isImmersion(): boolean {
-        return this.getState('cooling_mode', 0, '').toLowerCase() === 'immersion';
+        const mode = this.getState('cooling_mode', 0, '').toLowerCase();
+        return mode === 'immersion' || mode === 'immers';
     }
 
     private _renderFans(): TemplateResult {
-        if (this._isImmersion()) return html``;
         const count = this.detectCount('fan');
         if (!count) return html``;
 
@@ -360,14 +515,101 @@ export class AntminerDefaultLayout extends LitElement {
             const key = `fan_${i}_fan_speed`;
             const speed = this.getState(key, 0, '-');
             const unit = this.getUnit(key) || 'RPM';
+            const fanNumber = i + 1;
             rows.push(html`
                 <div class="data-row">
-                    <span class="name" title="${localize('stats.fan')} ${i}"><ha-icon class="fan-icon" icon="mdi:fan"></ha-icon> ${localize('stats.fan')} ${i}:</span>
+                    <span class="name icon-name" title="${localize('stats.fan')} ${fanNumber}">
+                        <ha-icon class="fan-icon" icon="mdi:fan"></ha-icon>${fanNumber}
+                    </span>
                     <span class="label clickable" @click=${(e) => this._navigate(e, key)}>${speed} ${unit}</span>
                 </div>
             `);
         }
         return html`${rows}`;
+    }
+
+    private _waterBlockCount(): number {
+        if (this.config.boardCount && this.config.boardCount > 0) return this.config.boardCount;
+
+        let count = 0;
+        for (let i = 0; i < MAX_BOARDS; i++) {
+            const inletKey = `board_${i}_inlet_water_temperature`;
+            const outletKey = `board_${i}_outlet_water_temperature`;
+            if (resolveEntity(this.hass, this.config, inletKey) || resolveEntity(this.hass, this.config, outletKey)) {
+                count = i + 1;
+            }
+        }
+        return count;
+    }
+
+    private _renderWaterBlocks(): TemplateResult {
+        const count = this._waterBlockCount();
+        if (!count) return html``;
+
+        const rows: TemplateResult[] = [];
+        for (let i = 0; i < count; i++) {
+            const blockNumber = i + 1;
+            const inletKey = `board_${i}_inlet_water_temperature`;
+            const outletKey = `board_${i}_outlet_water_temperature`;
+            const deltaKey = `board_${i}_water_temperature_delta`;
+            const inlet = this.getState(inletKey, 0, '-');
+            const outlet = this.getState(outletKey, 0, '-');
+            const delta = this.getState(deltaKey, 0, '');
+            const unit = this.getUnit(inletKey) || this.getUnit(outletKey) || '°C';
+
+            rows.push(html`
+                <div class="data-row">
+                    <span class="name icon-name" title="${localize('stats.block')} ${blockNumber}">
+                        <ha-icon class="water-icon" icon="mdi:water"></ha-icon>
+                        ${blockNumber}
+                    </span>
+                    <span class="label water-value">
+                        <span class="water-temp clickable" title="${localize('stats.inlet')}" @click=${(e) => this._navigate(e, inletKey)}>
+                            <span class="flow-arrow">→</span>${inlet}${unit}
+                        </span>
+                        <span>/</span>
+                        <span class="water-temp clickable" title="${localize('stats.outlet')}" @click=${(e) => this._navigate(e, outletKey)}>
+                            <span class="flow-arrow">←</span>${outlet}${unit}
+                        </span>
+                        ${delta !== '' ? html`
+                            <span class="delta clickable" @click=${(e) => this._navigate(e, deltaKey)}>Δ${delta}${unit}</span>
+                        ` : ''}
+                    </span>
+                </div>
+            `);
+        }
+        return html`${rows}`;
+    }
+
+    private _renderCooling(): TemplateResult {
+        return this._isImmersion() ? this._renderWaterBlocks() : this._renderFans();
+    }
+
+    private _renderMetricIcon(type: 'board' | 'chip' | 'voltage'): TemplateResult {
+        if (type === 'board') {
+            return html`
+                <svg class="metric-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0Z"></path>
+                    <path d="M12 8v8"></path>
+                </svg>
+            `;
+        }
+
+        if (type === 'chip') {
+            return html`
+                <svg class="metric-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="7" y="7" width="10" height="10" rx="1.5"></rect>
+                    <path d="M9 3v4M12 3v4M15 3v4M9 17v4M12 17v4M15 17v4"></path>
+                    <path d="M3 9h4M3 12h4M3 15h4M17 9h4M17 12h4M17 15h4"></path>
+                </svg>
+            `;
+        }
+
+        return html`
+            <svg class="metric-svg metric-svg-voltage" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M13 2 5 14h6l-1 8 8-12h-6l1-8Z"></path>
+            </svg>
+        `;
     }
 
     private _renderBoards(): TemplateResult {
@@ -380,23 +622,30 @@ export class AntminerDefaultLayout extends LitElement {
             const tempKey = `board_${i}_board_temperature`;
             const chipKey = `board_${i}_chip_temperature`;
             const hashKey = `board_${i}_board_hashrate`;
+            const voltageKey = `board_${i}_board_voltage`;
 
             const temp = parseFloat(this.getState(tempKey, 0, 'NaN'));
             const chip = parseFloat(this.getState(chipKey, 0, 'NaN'));
             const hashrate = this.getState(hashKey, this.config.decimals ?? 2, '-');
+            const voltage = this.getState(voltageKey, 2, '');
+            const voltageUnit = this.getUnit(voltageKey) || 'V';
 
             rows.push(html`
                 <div class="board-row stats-border">
                     <span class="pill">${i.toString().padStart(2, '0')}</span>
-                    <span class="label clickable ${this._tempClass(temp)}" @click=${(e) => this._navigate(e, tempKey)}>
-                        ${localize('stats.boardTemp')} ${isNaN(temp) ? '-' : temp + ' °C'}
+                    <span class="label board-metric clickable ${this._tempClass(temp)}" title="${localize('stats.boardTemp')}" @click=${(e) => this._navigate(e, tempKey)}>
+                        ${this._renderMetricIcon('board')}${isNaN(temp) ? '-' : temp + ' °C'}
                     </span>
-                    <span class="label clickable ${this._tempClass(chip)}" @click=${(e) => this._navigate(e, chipKey)}>
-                        ${localize('stats.chip')} ${isNaN(chip) ? '-' : chip + ' °C'}
+                    <span class="label board-metric clickable ${this._tempClass(chip)}" title="${localize('stats.chip')}" @click=${(e) => this._navigate(e, chipKey)}>
+                        ${this._renderMetricIcon('chip')}${isNaN(chip) ? '-' : chip + ' °C'}
                     </span>
                     <span class="label clickable accent-blue" @click=${(e) => this._navigate(e, hashKey)}>
                         ${hashrate} ${boardHashUnit}
                     </span>
+                    ${voltage !== '' ? html`
+                    <span class="label board-metric clickable" title="${voltageUnit}" @click=${(e) => this._navigate(e, voltageKey)}>
+                        ${this._renderMetricIcon('voltage')}${voltage} ${voltageUnit}
+                    </span>` : ''}
                 </div>
             `);
         }
@@ -406,25 +655,30 @@ export class AntminerDefaultLayout extends LitElement {
         `;
     }
 
-    private _renderOffline(name: string, model: string): TemplateResult {
+    private _renderOffline(name: string, model: string, reason: OfflineReason): TemplateResult {
         const showTitle = this.config.showTitle !== false;
+        const powerEntityId = this._powerEntityId();
+        const statusText = localize(reason === 'breaker_off' ? 'status.powerOff' : 'status.offline');
+        const noteText = localize(reason === 'breaker_off'
+            ? 'html_texts.breakerOffNote'
+            : 'html_texts.offlineNote');
+        const powerLabel = reason === 'breaker_off' ? 'buttons.powerOn' : 'buttons.power';
         return html`
         <ha-card>
             ${showTitle ? html`
             <div class="grid grid-1 section-padding">
                 <div class="center clickable" @click=${(e) => this._navigateTitle(e)}>
-                    <b>${name}</b> <span class="status-off">● ${localize('status.offline')}</span><br/>
+                    <b>${name}</b> <span class="status-off">● ${statusText}</span><br/>
                     <span class="model-line">${model}</span>
                 </div>
             </div>
             ` : html``}
-            <div class="offline-note">${localize('html_texts.offlineNote')}</div>
+            <div class="offline-note">${noteText}</div>
+            ${powerEntityId ? html`
             <div class="grid grid-1">
-                <div class="button-border button-padding center clickable" @click=${(e) => this._togglePower(e)}>
-                    <ha-icon class="webui-icon" icon="mdi:power"></ha-icon>
-                    <span class="status-off">${localize('buttons.powerOn')}</span>
-                </div>
+                ${this._renderPowerButton(powerLabel)}
             </div>
+            ` : html``}
         </ha-card>
         `;
     }
@@ -444,9 +698,10 @@ export class AntminerDefaultLayout extends LitElement {
             || '';
         const fw = device?.sw_version;
 
-        // Collapsed view when the external breaker is off
-        if (this._powerState() === 'off') {
-            return this._renderOffline(name, model);
+        // Collapsed view when the breaker is off or all key telemetry is unavailable.
+        const offlineReason = this._offlineReason();
+        if (offlineReason) {
+            return this._renderOffline(name, model, offlineReason);
         }
 
         const miningState = this.getState('active', 0, '', 'switch');
@@ -547,11 +802,7 @@ export class AntminerDefaultLayout extends LitElement {
                     <div class="data-row"><span class="name" title="${localize('stats.powerLimit')}">${localize('stats.powerLimit')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'power_limit')}>${powerLimit} W</span>
                     </div>` : ''}
-                    ${this._isImmersion() ? html`
-                    <div class="data-row"><span class="name" title="${localize('stats.cooling')}">${localize('stats.cooling')}</span>
-                        <span class="label clickable accent-blue" @click=${(e) => this._navigate(e, 'cooling_mode')}>${localize('html_texts.immersion')}</span>
-                    </div>` : ''}
-                    ${showFans ? this._renderFans() : ''}
+                    ${showFans ? this._renderCooling() : ''}
                 </div>
             </div>
             ` : html``}
