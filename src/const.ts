@@ -9,6 +9,7 @@ export enum EntityKey {
     power_limit = 'power_limit',
     efficiency = 'efficiency',
     active_preset_name = 'active_preset_name',
+    current_preset = 'current_preset',
     cooling_mode = 'cooling_mode',
     active = 'active',
 }

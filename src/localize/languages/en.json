@@ -34,6 +34,7 @@
     "power_limit": "Power limit entity",
     "efficiency": "Efficiency entity",
     "active_preset_name": "Active preset entity",
+    "current_preset": "Profile entity",
     "cooling_mode": "Cooling mode entity",
     "active": "Mining switch entity",
     "device_id": "Device ID"
@@ -48,6 +49,7 @@
   },
   "stats": {
     "hashrate": "Hashrate:",
+    "overclockProfile": "Profile:",
     "idealHashrate": "Ideal:",
     "temperature": "Temperature:",
     "power": "Power:",

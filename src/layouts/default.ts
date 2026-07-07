@@ -157,6 +157,14 @@ export class AntminerDefaultLayout extends LitElement {
             min-width: 0;
         }
 
+        .hashrate-value {
+            font-size: 2.05rem;
+        }
+
+        .hashrate-unit {
+            font-size: 1.05rem;
+        }
+
         .compute-chip {
             width: 20px;
             height: 20px;
@@ -767,6 +775,24 @@ export class AntminerDefaultLayout extends LitElement {
         `;
     }
 
+    private _formatPresetHashrate(preset: string): string {
+        const text = preset.trim();
+        if (!text) return text;
+
+        const searchText = text.includes('~')
+            ? text.slice(text.lastIndexOf('~') + 1)
+            : text;
+        const match = searchText.match(/([0-9]+(?:[.,][0-9]+)?)\s*([KMGTPE]?H(?:\/s)?|[KMGTPE]?Sol(?:\/s)?)/i);
+        if (!match) return '';
+
+        const value = match[1].replace(',', '.');
+        const unit = match[2]
+            .replace(/^([kmgtpe])h/i, (_, prefix) => `${prefix.toUpperCase()}H`)
+            .replace(/^h/i, 'H')
+            .replace(/^([kmgtpe])sol/i, (_, prefix) => `${prefix.toUpperCase()}Sol`);
+        return `${value} ${unit}`;
+    }
+
     private _renderBoards(): TemplateResult {
         const count = this.detectCount('board');
         if (!count) return html``;
@@ -870,8 +896,10 @@ export class AntminerDefaultLayout extends LitElement {
         const decimals = this.config.decimals ?? 2;
         const hashrate = this.getState('hashrate', decimals, '-');
         const hashUnit = this.getUnit('hashrate') || 'TH/s';
+        const currentPreset = this.getState('current_preset', 0);
+        const currentPresetHashrate = this._formatPresetHashrate(currentPreset);
         const idealHashrate = this.getState('ideal_hashrate', decimals);
-        const idealUnit = this.getUnit('ideal_hashrate');
+        const idealUnit = this.getUnit('ideal_hashrate') || hashUnit;
 
         const temp = parseFloat(this.getState('temperature', 0, 'NaN'));
         const tempUnit = this.getUnit('temperature') || '°C';
@@ -930,10 +958,14 @@ export class AntminerDefaultLayout extends LitElement {
                     <div class="clickable center" @click=${(e) => this._navigate(e, 'hashrate')}>
                         <span class="hashrate-line">
                             ${this._renderComputeChip()}
-                            <span class="big-value">${hashrate}</span>
-                            <span class="big-unit">${hashUnit}</span>
+                            <span class="big-value hashrate-value">${hashrate}</span>
+                            <span class="big-unit hashrate-unit">${hashUnit}</span>
                         </span>
                     </div>
+                    ${currentPresetHashrate !== '' ? html`
+                    <div class="data-row"><span class="name" title="${localize('stats.overclockProfile')}">${localize('stats.overclockProfile')}</span>
+                        <span class="label clickable" title="${currentPreset}" @click=${(e) => this._navigate(e, 'current_preset')}>${currentPresetHashrate}</span>
+                    </div>` : ''}
                     ${idealHashrate !== '' ? html`
                     <div class="data-row"><span class="name" title="${localize('stats.idealHashrate')}">${localize('stats.idealHashrate')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'ideal_hashrate')}>${idealHashrate} ${idealUnit}</span>
@@ -942,7 +974,7 @@ export class AntminerDefaultLayout extends LitElement {
                     <div class="data-row"><span class="name" title="${localize('stats.efficiency')}">${localize('stats.efficiency')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'efficiency')}>${efficiency} ${efficiencyUnit}</span>
                     </div>` : ''}
-                    ${preset !== '' && preset !== 'unknown' ? html`
+                    ${preset !== '' && preset !== 'unknown' && (currentPreset === '' || currentPreset === 'unknown') ? html`
                     <div class="data-row"><span class="name" title="${localize('stats.preset')}">${localize('stats.preset')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'active_preset_name')}>${preset}</span>
                     </div>` : ''}

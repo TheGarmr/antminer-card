@@ -92,6 +92,7 @@ function minerStates(prefix, spec) {
     if (spec.powerLimit != null) s[`sensor.${prefix}_power_limit`] = st(spec.powerLimit, 'W');
     if (spec.efficiency != null) s[`sensor.${prefix}_efficiency`] = st(spec.efficiency, 'J/TH');
     if (spec.preset) s[`sensor.${prefix}_active_preset_name`] = st(spec.preset);
+    if (spec.currentPreset) s[`sensor.${prefix}_current_preset`] = st(spec.currentPreset);
     if (spec.cooling) s[`sensor.${prefix}_cooling_mode`] = st(spec.cooling);
     s[`switch.${prefix}_active`] = st(spec.unavailable ? 'unavailable' : spec.active ? 'on' : 'off');
     if (spec.breaker) s[`switch.${prefix}_breaker`] = st(spec.breaker);
@@ -128,7 +129,7 @@ const MINERS = {
     },
     s21: {
         hashrate: 205.34, ideal: 200, hashUnit: 'TH/s', temp: 64,
-        power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default',
+        power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default', currentPreset: '6619 watt ~ 422 TH',
         cooling: 'immersion',
         waterBlocks: [[34, 45], [34, 46], [34, 45]], active: true,
         boards: [[58, 64, 68.45, 21.08], [59, 65, 69.12, 21.15], [57, 63, 67.77, 21.04]],

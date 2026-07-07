@@ -34,6 +34,7 @@
     "power_limit": "Сутність ліміту потужності",
     "efficiency": "Сутність ефективності",
     "active_preset_name": "Сутність активного пресету",
+    "current_preset": "Сутність профілю",
     "cooling_mode": "Сутність режиму охолодження",
     "active": "Перемикач майнінгу",
     "device_id": "ID пристрою"
@@ -48,6 +49,7 @@
   },
   "stats": {
     "hashrate": "Хешрейт:",
+    "overclockProfile": "Профіль:",
     "idealHashrate": "Ідеальний:",
     "temperature": "Температура:",
     "power": "Потужність:",

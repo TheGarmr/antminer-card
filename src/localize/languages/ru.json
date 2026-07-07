@@ -34,6 +34,7 @@
     "power_limit": "Сущность лимита мощности",
     "efficiency": "Сущность эффективности",
     "active_preset_name": "Сущность активного пресета",
+    "current_preset": "Сущность профиля",
     "cooling_mode": "Сущность режима охлаждения",
     "active": "Переключатель майнинга",
     "device_id": "ID устройства"
@@ -48,6 +49,7 @@
   },
   "stats": {
     "hashrate": "Хешрейт:",
+    "overclockProfile": "Профиль:",
     "idealHashrate": "Идеальный:",
     "temperature": "Температура:",
     "power": "Мощность:",
