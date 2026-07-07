@@ -149,6 +149,39 @@ export class AntminerDefaultLayout extends LitElement {
             color: var(--amc-yellow);
         }
 
+        .hashrate-line {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .compute-chip {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            color: var(--amc-blue);
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 1.7;
+            animation: compute-chip-pulse 2.2s ease-in-out infinite;
+        }
+
+        .compute-chip-core {
+            fill: rgba(66, 165, 245, 0.18);
+        }
+
+        .compute-chip-trace {
+            animation: compute-trace-pulse 1.1s ease-in-out infinite;
+        }
+
+        .compute-chip-trace-alt {
+            animation-delay: 0.35s;
+        }
+
         .temp-ok {
             color: var(--amc-text);
         }
@@ -239,15 +272,105 @@ export class AntminerDefaultLayout extends LitElement {
             stroke: none;
         }
 
+        @keyframes fan-spin-clockwise {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes water-bubble {
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+            35% {
+                transform: translateY(-2px) scale(1.08);
+            }
+            70% {
+                transform: translateY(1px) scale(0.96);
+            }
+        }
+
+        @keyframes flow-right {
+            0% {
+                transform: translateX(-4px);
+                opacity: 0;
+                text-shadow: -7px 0 0 rgba(66, 165, 245, 0);
+            }
+            28% {
+                opacity: 0.9;
+            }
+            68% {
+                opacity: 1;
+                text-shadow: -4px 0 0 rgba(66, 165, 245, 0.35);
+            }
+            100% {
+                transform: translateX(7px);
+                opacity: 0;
+                text-shadow: -9px 0 0 rgba(66, 165, 245, 0);
+            }
+        }
+
+        @keyframes flow-left {
+            0% {
+                transform: translateX(4px);
+                opacity: 0;
+                text-shadow: 7px 0 0 rgba(66, 165, 245, 0);
+            }
+            28% {
+                opacity: 0.9;
+            }
+            68% {
+                opacity: 1;
+                text-shadow: 4px 0 0 rgba(66, 165, 245, 0.35);
+            }
+            100% {
+                transform: translateX(-7px);
+                opacity: 0;
+                text-shadow: 9px 0 0 rgba(66, 165, 245, 0);
+            }
+        }
+
+        @keyframes compute-chip-pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0 rgba(66, 165, 245, 0));
+            }
+            50% {
+                transform: scale(1.06);
+                filter: drop-shadow(0 0 4px rgba(66, 165, 245, 0.45));
+            }
+        }
+
+        @keyframes compute-trace-pulse {
+            0%,
+            100% {
+                opacity: 0.35;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
         .fan-icon {
             --mdc-icon-size: 16px;
+            display: inline-flex;
+            transform-origin: center;
             vertical-align: text-bottom;
+            animation: fan-spin-clockwise 3.2s linear infinite;
         }
 
         .water-icon {
             --mdc-icon-size: 16px;
+            display: inline-flex;
+            transform-origin: center;
             vertical-align: text-bottom;
             color: var(--amc-blue);
+            animation: water-bubble 2.8s ease-in-out infinite;
         }
 
         .water-value {
@@ -267,8 +390,28 @@ export class AntminerDefaultLayout extends LitElement {
         }
 
         .flow-arrow {
+            display: inline-block;
             color: var(--amc-blue);
             font-weight: 700;
+        }
+
+        .flow-arrow-right {
+            animation: flow-right 1.45s linear infinite;
+        }
+
+        .flow-arrow-left {
+            animation: flow-left 1.45s linear infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .compute-chip,
+            .compute-chip-trace,
+            .fan-icon,
+            .water-icon,
+            .flow-arrow-right,
+            .flow-arrow-left {
+                animation: none;
+            }
         }
 
         .delta {
@@ -565,11 +708,11 @@ export class AntminerDefaultLayout extends LitElement {
                     </span>
                     <span class="label water-value">
                         <span class="water-temp clickable" title="${localize('stats.inlet')}" @click=${(e) => this._navigate(e, inletKey)}>
-                            <span class="flow-arrow">→</span>${inlet}${unit}
+                            <span class="flow-arrow flow-arrow-right">→</span>${inlet}${unit}
                         </span>
                         <span>/</span>
                         <span class="water-temp clickable" title="${localize('stats.outlet')}" @click=${(e) => this._navigate(e, outletKey)}>
-                            <span class="flow-arrow">←</span>${outlet}${unit}
+                            <span class="flow-arrow flow-arrow-left">←</span>${outlet}${unit}
                         </span>
                         ${delta !== '' ? html`
                             <span class="delta clickable" @click=${(e) => this._navigate(e, deltaKey)}>Δ${delta}${unit}</span>
@@ -583,6 +726,18 @@ export class AntminerDefaultLayout extends LitElement {
 
     private _renderCooling(): TemplateResult {
         return this._isImmersion() ? this._renderWaterBlocks() : this._renderFans();
+    }
+
+    private _renderComputeChip(): TemplateResult {
+        return html`
+            <svg class="compute-chip" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect class="compute-chip-core" x="7" y="7" width="10" height="10" rx="1.8"></rect>
+                <path d="M9 3v4M12 3v4M15 3v4M9 17v4M12 17v4M15 17v4"></path>
+                <path d="M3 9h4M3 12h4M3 15h4M17 9h4M17 12h4M17 15h4"></path>
+                <path class="compute-chip-trace" d="M9.5 10.2h5M9.5 13.8h5"></path>
+                <path class="compute-chip-trace compute-chip-trace-alt" d="M10.2 9.5v5M13.8 9.5v5"></path>
+            </svg>
+        `;
     }
 
     private _renderMetricIcon(type: 'board' | 'chip' | 'voltage'): TemplateResult {
@@ -773,7 +928,11 @@ export class AntminerDefaultLayout extends LitElement {
             <div class="grid grid-2 section-padding">
                 <div class="stats-padding stats-border">
                     <div class="clickable center" @click=${(e) => this._navigate(e, 'hashrate')}>
-                        <span class="big-value">${hashrate}</span> <span class="big-unit">${hashUnit}</span>
+                        <span class="hashrate-line">
+                            ${this._renderComputeChip()}
+                            <span class="big-value">${hashrate}</span>
+                            <span class="big-unit">${hashUnit}</span>
+                        </span>
                     </div>
                     ${idealHashrate !== '' ? html`
                     <div class="data-row"><span class="name" title="${localize('stats.idealHashrate')}">${localize('stats.idealHashrate')}</span>
