@@ -178,6 +178,27 @@ export class AntminerCardEditor extends LitElement implements LovelaceCardEditor
                             },
                         ],
                     },
+                    {
+                        type: 'expandable',
+                        title: localize('config.customEntities'),
+                        schema: [
+                            {
+                                type: 'grid',
+                                column_min_width: '200px',
+                                schema: [
+                                    { name: 'customEntity1', selector: { entity: {} } },
+                                    { name: 'customEntity1Name', selector: { text: {} } },
+                                    { name: 'customEntity1Icon', selector: { icon: {} } },
+                                    { name: 'customEntity2', selector: { entity: {} } },
+                                    { name: 'customEntity2Name', selector: { text: {} } },
+                                    { name: 'customEntity2Icon', selector: { icon: {} } },
+                                    { name: 'customEntity3', selector: { entity: {} } },
+                                    { name: 'customEntity3Name', selector: { text: {} } },
+                                    { name: 'customEntity3Icon', selector: { icon: {} } },
+                                ],
+                            },
+                        ],
+                    },
                 ]}
                 @value-changed=${this._valueChanged.bind(this)}
             ></ha-form>

@@ -3,7 +3,7 @@ export const MAIN_NAME = 'antminer-card';
 
 export enum EntityKey {
     hashrate = 'hashrate',
-    ideal_hashrate = 'ideal_hashrate',
+    mining_time = 'mining_time',
     temperature = 'temperature',
     miner_consumption = 'miner_consumption',
     power_limit = 'power_limit',

@@ -64,7 +64,18 @@ if (!customElements.get('ha-card')) {
     });
 }
 if (!customElements.get('ha-icon')) {
-    const GLYPHS = { 'mdi:fan': '✻', 'mdi:water': '💧', 'mdi:open-in-new': '↗', 'mdi:pickaxe': '⛏', 'mdi:pause': '⏸', 'mdi:play': '▶' };
+    const GLYPHS = {
+        'mdi:fan': '✻',
+        'mdi:water': '💧',
+        'mdi:open-in-new': '↗',
+        'mdi:pickaxe': '⛏',
+        'mdi:pause': '⏸',
+        'mdi:play': '▶',
+        'mdi:clock-outline': '◷',
+        'mdi:tune-variant': '≋',
+        'mdi:currency-usd': '$',
+        'mdi:information-outline': 'i',
+    };
     // re-render glyph when the icon attribute changes (play <-> pause)
     customElements.define('ha-icon', class extends HTMLElement {
         static get observedAttributes() { return ['icon']; }
@@ -87,12 +98,16 @@ function minerStates(prefix, spec) {
     const s = {};
     s[`sensor.${prefix}_hashrate`] = spec.unavailable ? unavailable(spec.hashUnit) : st(spec.hashrate, spec.hashUnit);
     if (spec.ideal != null) s[`sensor.${prefix}_ideal_hashrate`] = spec.unavailable ? unavailable(spec.hashUnit) : st(spec.ideal, spec.hashUnit);
+    if (spec.miningTime) s[`sensor.${prefix}_mining_time`] = spec.unavailable ? unavailable('s') : st(spec.miningTime, 's');
     s[`sensor.${prefix}_temperature`] = spec.unavailable ? unavailable('°C') : st(spec.temp, '°C');
     if (spec.power != null) s[`sensor.${prefix}_miner_consumption`] = spec.unavailable ? unavailable('W') : st(spec.power, 'W');
     if (spec.powerLimit != null) s[`sensor.${prefix}_power_limit`] = st(spec.powerLimit, 'W');
     if (spec.efficiency != null) s[`sensor.${prefix}_efficiency`] = st(spec.efficiency, 'J/TH');
     if (spec.preset) s[`sensor.${prefix}_active_preset_name`] = st(spec.preset);
     if (spec.currentPreset) s[`sensor.${prefix}_current_preset`] = st(spec.currentPreset);
+    (spec.custom || []).forEach((item, i) => {
+        s[`sensor.${prefix}_custom_${i + 1}`] = st(item[0], item[1]);
+    });
     if (spec.cooling) s[`sensor.${prefix}_cooling_mode`] = st(spec.cooling);
     s[`switch.${prefix}_active`] = st(spec.unavailable ? 'unavailable' : spec.active ? 'on' : 'off');
     if (spec.breaker) s[`switch.${prefix}_breaker`] = st(spec.breaker);
@@ -130,6 +145,8 @@ const MINERS = {
     s21: {
         hashrate: 205.34, ideal: 200, hashUnit: 'TH/s', temp: 64,
         power: 3250, powerLimit: 3500, efficiency: 15.8, preset: 'default', currentPreset: '6619 watt ~ 422 TH',
+        miningTime: 14334,
+        custom: [[12.45, '$'], [86.20, '$'], [452.91, '$']],
         cooling: 'immersion',
         waterBlocks: [[34, 45], [34, 46], [34, 45]], active: true,
         boards: [[58, 64, 68.45, 21.08], [59, 65, 69.12, 21.15], [57, 63, 67.77, 21.04]],
@@ -198,6 +215,13 @@ function addCard(prefix) {
     const el = document.createElement('antminer-card');
     const cfg = { prefix };
     if (hass.states[`switch.${prefix}_breaker`]) cfg.powerSwitch = `switch.${prefix}_breaker`;
+    if (prefix === 's21') {
+        cfg.customEntities = [
+            { entity: 'sensor.s21_custom_1', icon: 'mdi:currency-usd', name: 'Day' },
+            { entity: 'sensor.s21_custom_2', icon: 'mdi:currency-usd', name: 'Month' },
+            { entity: 'sensor.s21_custom_3', icon: 'mdi:currency-usd', name: 'Total' },
+        ];
+    }
     el.setConfig(cfg);
     el.hass = hass;
     container.appendChild(el);

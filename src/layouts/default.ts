@@ -1,7 +1,7 @@
 import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
-import { AntminerCardConfig } from '../interfaces';
+import { AntminerCardConfig, AntminerCustomEntityConfig } from '../interfaces';
 import { localize } from '../localize/localize';
 import { globalData } from '../helpers/globals';
 import {
@@ -261,12 +261,21 @@ export class AntminerDefaultLayout extends LitElement {
             width: 16px;
             height: 16px;
             flex: 0 0 16px;
-            color: var(--secondary-text-color, #808080);
             fill: none;
             stroke: currentColor;
             stroke-linecap: round;
             stroke-linejoin: round;
             stroke-width: 2;
+        }
+
+        .metric-svg-temp {
+            color: currentColor;
+        }
+
+        .metric-svg-soft-fill {
+            fill: currentColor;
+            opacity: 0.2;
+            stroke: none;
         }
 
         .metric-svg-fill {
@@ -364,6 +373,43 @@ export class AntminerDefaultLayout extends LitElement {
             }
         }
 
+        @keyframes clock-live {
+            0%,
+            100% {
+                transform: rotate(0deg) scale(1);
+                opacity: 0.78;
+            }
+            35% {
+                transform: rotate(7deg) scale(1.05);
+                opacity: 1;
+            }
+            70% {
+                transform: rotate(-4deg) scale(1);
+                opacity: 0.86;
+            }
+        }
+
+        .row-icon {
+            --mdc-icon-size: 16px;
+            display: inline-flex;
+            flex: 0 0 16px;
+            transform-origin: center;
+            vertical-align: text-bottom;
+        }
+
+        .profile-icon {
+            color: var(--amc-yellow);
+        }
+
+        .clock-icon {
+            color: var(--amc-blue);
+            animation: clock-live 2s ease-in-out infinite;
+        }
+
+        .custom-entity-icon {
+            color: var(--secondary-text-color, #808080);
+        }
+
         .fan-icon {
             --mdc-icon-size: 16px;
             display: inline-flex;
@@ -414,6 +460,7 @@ export class AntminerDefaultLayout extends LitElement {
         @media (prefers-reduced-motion: reduce) {
             .compute-chip,
             .compute-chip-trace,
+            .clock-icon,
             .fan-icon,
             .water-icon,
             .flow-arrow-right,
@@ -461,6 +508,16 @@ export class AntminerDefaultLayout extends LitElement {
         navigate(event, this.config, entityKey, type, this.hass);
     }
 
+    private _navigateEntity(event, entityId: string) {
+        if (!event || !entityId) return;
+        event.stopPropagation();
+        const customEvent = new CustomEvent('hass-more-info', {
+            detail: { entityId },
+            composed: true,
+        });
+        event.target.dispatchEvent(customEvent);
+    }
+
     private _navigateTitle(event) {
         navigateTitle(event, this.hass, this.config);
     }
@@ -486,6 +543,13 @@ export class AntminerDefaultLayout extends LitElement {
         if (this._isUnavailableState(state)) return null;
         const value = Number(state);
         return Number.isFinite(value) ? value : null;
+    }
+
+    private _directEntityDisplay(entityId: string): string {
+        const entity = this.hass?.states?.[entityId];
+        if (!entity || this._isUnavailableState(entity.state)) return '';
+        const unit = entity.attributes?.unit_of_measurement;
+        return `${entity.state}${unit ? ` ${unit}` : ''}`;
     }
 
     private _minerEntitiesUnavailable(): boolean {
@@ -751,7 +815,8 @@ export class AntminerDefaultLayout extends LitElement {
     private _renderMetricIcon(type: 'board' | 'chip' | 'voltage'): TemplateResult {
         if (type === 'board') {
             return html`
-                <svg class="metric-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <svg class="metric-svg metric-svg-temp" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path class="metric-svg-soft-fill" d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0Z"></path>
                     <path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0Z"></path>
                     <path d="M12 8v8"></path>
                 </svg>
@@ -760,7 +825,8 @@ export class AntminerDefaultLayout extends LitElement {
 
         if (type === 'chip') {
             return html`
-                <svg class="metric-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <svg class="metric-svg metric-svg-temp" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect class="metric-svg-soft-fill" x="7" y="7" width="10" height="10" rx="1.5"></rect>
                     <rect x="7" y="7" width="10" height="10" rx="1.5"></rect>
                     <path d="M9 3v4M12 3v4M15 3v4M9 17v4M12 17v4M15 17v4"></path>
                     <path d="M3 9h4M3 12h4M3 15h4M17 9h4M17 12h4M17 15h4"></path>
@@ -791,6 +857,107 @@ export class AntminerDefaultLayout extends LitElement {
             .replace(/^h/i, 'H')
             .replace(/^([kmgtpe])sol/i, (_, prefix) => `${prefix.toUpperCase()}Sol`);
         return `${value} ${unit}`;
+    }
+
+    private _renderProfileHashrate(currentPreset: string, currentPresetHashrate: string): TemplateResult {
+        if (currentPresetHashrate === '') return html``;
+        return html`
+            <div class="data-row">
+                <span class="name icon-name" title="${localize('stats.overclockProfile')}">
+                    <ha-icon class="row-icon profile-icon" icon="mdi:tune-variant"></ha-icon>
+                </span>
+                <span class="label clickable" title="${currentPreset}" @click=${(e) => this._navigate(e, 'current_preset')}>
+                    ${currentPresetHashrate}
+                </span>
+            </div>
+        `;
+    }
+
+    private _renderMiningTime(): TemplateResult {
+        const miningTime = this.getState('mining_time', 0, '');
+        if (miningTime === '') return html``;
+        const miningTimeUnit = this.getUnit('mining_time');
+        const miningTimeValue = this._formatDuration(miningTime, miningTimeUnit);
+        return html`
+            <div class="data-row">
+                <span class="name icon-name" title="${localize('stats.miningTime')}">
+                    <ha-icon class="row-icon clock-icon" icon="mdi:clock-outline"></ha-icon>
+                </span>
+                <span class="label clickable" @click=${(e) => this._navigate(e, 'mining_time')}>
+                    ${miningTimeValue}
+                </span>
+            </div>
+        `;
+    }
+
+    private _formatDuration(value: string, unit: string): string {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return `${value}${unit ? ` ${unit}` : ''}`;
+
+        const normalizedUnit = unit.toLowerCase();
+        let seconds = numeric;
+        if (['min', 'm'].includes(normalizedUnit)) seconds *= 60;
+        if (['h', 'hr'].includes(normalizedUnit)) seconds *= 3600;
+        if (['d'].includes(normalizedUnit)) seconds *= 86400;
+
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+
+        if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        if (minutes > 0) return `${minutes}m`;
+        return `${Math.floor(seconds)}s`;
+    }
+
+    private _configuredCustomEntities(): AntminerCustomEntityConfig[] {
+        const config = this.config as AntminerCardConfig & Record<string, unknown>;
+        const rows: AntminerCustomEntityConfig[] = [];
+
+        for (let i = 1; i <= 3; i++) {
+            const entity = config[`customEntity${i}`]?.toString().trim();
+            const name = config[`customEntity${i}Name`]?.toString().trim();
+            const icon = config[`customEntity${i}Icon`]?.toString().trim();
+            if (entity) rows.push({ entity, icon, name });
+        }
+
+        if (rows.length === 0 && Array.isArray(this.config.customEntities)) {
+            for (const item of this.config.customEntities) {
+                const entity = item?.entity?.toString().trim();
+                const icon = item?.icon?.toString().trim();
+                const name = item?.name?.toString().trim();
+                if (entity) rows.push({ entity, icon, name });
+                if (rows.length >= 3) break;
+            }
+        }
+
+        return rows.slice(0, 3);
+    }
+
+    private _renderCustomEntities(): TemplateResult {
+        const rows = this._configuredCustomEntities().map(({ entity, icon, name }) => {
+            if (!entity) return html``;
+            const stateObj = this.hass?.states?.[entity];
+            const value = this._directEntityDisplay(entity);
+            if (value === '') return html``;
+
+            const iconName = icon || stateObj?.attributes?.icon || 'mdi:information-outline';
+            const friendlyName = stateObj?.attributes?.friendly_name || entity;
+            const title = name || friendlyName;
+            return html`
+                <div class="data-row">
+                    <span class="name icon-name" title="${title}">
+                        <ha-icon class="row-icon custom-entity-icon" icon="${iconName}"></ha-icon>
+                        ${name || ''}
+                    </span>
+                    <span class="label clickable" @click=${(e) => this._navigateEntity(e, entity)}>
+                        ${value}
+                    </span>
+                </div>
+            `;
+        });
+
+        return html`${rows}`;
     }
 
     private _renderBoards(): TemplateResult {
@@ -898,8 +1065,6 @@ export class AntminerDefaultLayout extends LitElement {
         const hashUnit = this.getUnit('hashrate') || 'TH/s';
         const currentPreset = this.getState('current_preset', 0);
         const currentPresetHashrate = this._formatPresetHashrate(currentPreset);
-        const idealHashrate = this.getState('ideal_hashrate', decimals);
-        const idealUnit = this.getUnit('ideal_hashrate') || hashUnit;
 
         const temp = parseFloat(this.getState('temperature', 0, 'NaN'));
         const tempUnit = this.getUnit('temperature') || '°C';
@@ -907,8 +1072,6 @@ export class AntminerDefaultLayout extends LitElement {
 
         const power = this.getState('miner_consumption', 0);
         const powerLimit = this.getState('power_limit', 0);
-        const efficiency = this.getState('efficiency', 1);
-        const efficiencyUnit = this.getUnit('efficiency') || 'J/TH';
         const preset = this.getState('active_preset_name', 0);
 
         const showTitle = this.config.showTitle !== false;
@@ -962,18 +1125,9 @@ export class AntminerDefaultLayout extends LitElement {
                             <span class="big-unit hashrate-unit">${hashUnit}</span>
                         </span>
                     </div>
-                    ${currentPresetHashrate !== '' ? html`
-                    <div class="data-row"><span class="name" title="${localize('stats.overclockProfile')}">${localize('stats.overclockProfile')}</span>
-                        <span class="label clickable" title="${currentPreset}" @click=${(e) => this._navigate(e, 'current_preset')}>${currentPresetHashrate}</span>
-                    </div>` : ''}
-                    ${idealHashrate !== '' ? html`
-                    <div class="data-row"><span class="name" title="${localize('stats.idealHashrate')}">${localize('stats.idealHashrate')}</span>
-                        <span class="label clickable" @click=${(e) => this._navigate(e, 'ideal_hashrate')}>${idealHashrate} ${idealUnit}</span>
-                    </div>` : ''}
-                    ${efficiency !== '' && parseFloat(efficiency) > 0 ? html`
-                    <div class="data-row"><span class="name" title="${localize('stats.efficiency')}">${localize('stats.efficiency')}</span>
-                        <span class="label clickable" @click=${(e) => this._navigate(e, 'efficiency')}>${efficiency} ${efficiencyUnit}</span>
-                    </div>` : ''}
+                    ${this._renderProfileHashrate(currentPreset, currentPresetHashrate)}
+                    ${this._renderMiningTime()}
+                    ${this._renderCustomEntities()}
                     ${preset !== '' && preset !== 'unknown' && (currentPreset === '' || currentPreset === 'unknown') ? html`
                     <div class="data-row"><span class="name" title="${localize('stats.preset')}">${localize('stats.preset')}</span>
                         <span class="label clickable" @click=${(e) => this._navigate(e, 'active_preset_name')}>${preset}</span>

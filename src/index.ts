@@ -50,6 +50,16 @@ export class AntminerCard extends LitElement {
             showFans: true,
             showBoards: true,
             showCardVersion: false,
+            customEntities: [],
+            customEntity1: '',
+            customEntity1Name: '',
+            customEntity1Icon: '',
+            customEntity2: '',
+            customEntity2Name: '',
+            customEntity2Icon: '',
+            customEntity3: '',
+            customEntity3Name: '',
+            customEntity3Icon: '',
             entities: Object.keys(EntityKey).reduce((acc, key) => {
                 acc[key as EntityKey] = '';
                 return acc;

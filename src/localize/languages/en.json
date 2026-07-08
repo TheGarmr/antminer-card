@@ -28,7 +28,7 @@
     "showBoards": "Boards",
     "showCardVersion": "Version",
     "hashrate": "Hashrate entity",
-    "ideal_hashrate": "Ideal hashrate entity",
+    "mining_time": "Mining time entity",
     "temperature": "Temperature entity",
     "miner_consumption": "Power consumption entity",
     "power_limit": "Power limit entity",
@@ -37,7 +37,17 @@
     "current_preset": "Profile entity",
     "cooling_mode": "Cooling mode entity",
     "active": "Mining switch entity",
-    "device_id": "Device ID"
+    "device_id": "Device ID",
+    "customEntities": "Custom entities",
+    "customEntity1": "Custom entity 1",
+    "customEntity1Name": "Custom name 1",
+    "customEntity1Icon": "Custom icon 1",
+    "customEntity2": "Custom entity 2",
+    "customEntity2Name": "Custom name 2",
+    "customEntity2Icon": "Custom icon 2",
+    "customEntity3": "Custom entity 3",
+    "customEntity3Name": "Custom name 3",
+    "customEntity3Icon": "Custom icon 3"
   },
   "buttons": {
     "mining": "Mining",
@@ -50,7 +60,7 @@
   "stats": {
     "hashrate": "Hashrate:",
     "overclockProfile": "Profile:",
-    "idealHashrate": "Ideal:",
+    "miningTime": "Mining time:",
     "temperature": "Temperature:",
     "power": "Power:",
     "powerLimit": "Power limit:",

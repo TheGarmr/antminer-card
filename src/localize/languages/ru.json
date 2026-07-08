@@ -28,7 +28,7 @@
     "showBoards": "Платы",
     "showCardVersion": "Версия",
     "hashrate": "Сущность хешрейта",
-    "ideal_hashrate": "Сущность идеального хешрейта",
+    "mining_time": "Сущность времени майнинга",
     "temperature": "Сущность температуры",
     "miner_consumption": "Сущность потребления",
     "power_limit": "Сущность лимита мощности",
@@ -37,7 +37,17 @@
     "current_preset": "Сущность профиля",
     "cooling_mode": "Сущность режима охлаждения",
     "active": "Переключатель майнинга",
-    "device_id": "ID устройства"
+    "device_id": "ID устройства",
+    "customEntities": "Кастомные сущности",
+    "customEntity1": "Кастомная сущность 1",
+    "customEntity1Name": "Название поля 1",
+    "customEntity1Icon": "Кастомная иконка 1",
+    "customEntity2": "Кастомная сущность 2",
+    "customEntity2Name": "Название поля 2",
+    "customEntity2Icon": "Кастомная иконка 2",
+    "customEntity3": "Кастомная сущность 3",
+    "customEntity3Name": "Название поля 3",
+    "customEntity3Icon": "Кастомная иконка 3"
   },
   "buttons": {
     "mining": "Возобновить",
@@ -50,7 +60,7 @@
   "stats": {
     "hashrate": "Хешрейт:",
     "overclockProfile": "Профиль:",
-    "idealHashrate": "Идеальный:",
+    "miningTime": "Время майнинга:",
     "temperature": "Температура:",
     "power": "Мощность:",
     "powerLimit": "Лимит:",
