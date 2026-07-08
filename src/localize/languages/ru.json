@@ -38,16 +38,11 @@
     "cooling_mode": "Сущность режима охлаждения",
     "active": "Переключатель майнинга",
     "device_id": "ID устройства",
-    "customEntities": "Кастомные сущности",
-    "customEntity1": "Кастомная сущность 1",
-    "customEntity1Name": "Название поля 1",
-    "customEntity1Icon": "Кастомная иконка 1",
-    "customEntity2": "Кастомная сущность 2",
-    "customEntity2Name": "Название поля 2",
-    "customEntity2Icon": "Кастомная иконка 2",
-    "customEntity3": "Кастомная сущность 3",
-    "customEntity3Name": "Название поля 3",
-    "customEntity3Icon": "Кастомная иконка 3"
+    "customEntities": "Доп. информация",
+    "customEntityField": "Поле",
+    "customEntity": "Сущность",
+    "customEntityName": "Название",
+    "customEntityIcon": "Иконка"
   },
   "buttons": {
     "mining": "Возобновить",

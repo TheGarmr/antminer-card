@@ -911,27 +911,19 @@ export class AntminerDefaultLayout extends LitElement {
     }
 
     private _configuredCustomEntities(): AntminerCustomEntityConfig[] {
-        const config = this.config as AntminerCardConfig & Record<string, unknown>;
         const rows: AntminerCustomEntityConfig[] = [];
 
-        for (let i = 1; i <= 3; i++) {
-            const entity = config[`customEntity${i}`]?.toString().trim();
-            const name = config[`customEntity${i}Name`]?.toString().trim();
-            const icon = config[`customEntity${i}Icon`]?.toString().trim();
-            if (entity) rows.push({ entity, icon, name });
-        }
-
-        if (rows.length === 0 && Array.isArray(this.config.customEntities)) {
+        if (Array.isArray(this.config.customEntities)) {
             for (const item of this.config.customEntities) {
                 const entity = item?.entity?.toString().trim();
-                const icon = item?.icon?.toString().trim();
                 const name = item?.name?.toString().trim();
-                if (entity) rows.push({ entity, icon, name });
+                const icon = item?.icon?.toString().trim();
+                if (entity) rows.push({ entity, name, icon });
                 if (rows.length >= 3) break;
             }
         }
 
-        return rows.slice(0, 3);
+        return rows;
     }
 
     private _renderCustomEntities(): TemplateResult {

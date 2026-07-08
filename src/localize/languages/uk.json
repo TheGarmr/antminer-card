@@ -38,16 +38,11 @@
     "cooling_mode": "Сутність режиму охолодження",
     "active": "Перемикач майнінгу",
     "device_id": "ID пристрою",
-    "customEntities": "Кастомні сутності",
-    "customEntity1": "Кастомна сутність 1",
-    "customEntity1Name": "Назва поля 1",
-    "customEntity1Icon": "Кастомна іконка 1",
-    "customEntity2": "Кастомна сутність 2",
-    "customEntity2Name": "Назва поля 2",
-    "customEntity2Icon": "Кастомна іконка 2",
-    "customEntity3": "Кастомна сутність 3",
-    "customEntity3Name": "Назва поля 3",
-    "customEntity3Icon": "Кастомна іконка 3"
+    "customEntities": "Дод. інформація",
+    "customEntityField": "Поле",
+    "customEntity": "Сутність",
+    "customEntityName": "Назва",
+    "customEntityIcon": "Іконка"
   },
   "buttons": {
     "mining": "Майніти",

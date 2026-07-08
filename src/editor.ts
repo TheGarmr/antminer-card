@@ -2,7 +2,7 @@ import { HomeAssistant, LovelaceCardEditor, LovelaceConfig } from 'custom-card-h
 import { html, LitElement, TemplateResult, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { EDITOR_NAME, EntityKey } from './const';
-import { AntminerCardConfig } from './interfaces';
+import { AntminerCardConfig, AntminerCustomEntityConfig } from './interfaces';
 import { localize } from './localize/localize';
 import { fireEvent } from './helpers/utils';
 
@@ -29,11 +29,31 @@ export class AntminerCardEditor extends LitElement implements LovelaceCardEditor
                 text-overflow: ellipsis;
                 word-break: break-word;
             }
+            .custom-entities-panel {
+                margin-top: 10px;
+            }
+            .custom-entity-list {
+                display: grid;
+                gap: 12px;
+                padding: 16px;
+            }
+            .custom-entity-title {
+                font-size: 13px;
+                color: var(--secondary-text-color);
+                margin-bottom: 6px;
+            }
         `;
     }
 
     public setConfig(config: AntminerCardConfig): void {
-        this._config = { ...config };
+        const normalized = { ...config } as AntminerCardConfig & Record<string, unknown>;
+        normalized.customEntities = this._normalizeCustomEntities(normalized);
+        for (const key of Object.keys(normalized)) {
+            if (/^customEntity[1-3](Name|Icon)?$/.test(key)) {
+                delete normalized[key];
+            }
+        }
+        this._config = normalized;
     }
 
     private renderBoolean(label: string, configKey: keyof AntminerCardConfig) {
@@ -178,30 +198,11 @@ export class AntminerCardEditor extends LitElement implements LovelaceCardEditor
                             },
                         ],
                     },
-                    {
-                        type: 'expandable',
-                        title: localize('config.customEntities'),
-                        schema: [
-                            {
-                                type: 'grid',
-                                column_min_width: '200px',
-                                schema: [
-                                    { name: 'customEntity1', selector: { entity: {} } },
-                                    { name: 'customEntity1Name', selector: { text: {} } },
-                                    { name: 'customEntity1Icon', selector: { icon: {} } },
-                                    { name: 'customEntity2', selector: { entity: {} } },
-                                    { name: 'customEntity2Name', selector: { text: {} } },
-                                    { name: 'customEntity2Icon', selector: { icon: {} } },
-                                    { name: 'customEntity3', selector: { entity: {} } },
-                                    { name: 'customEntity3Name', selector: { text: {} } },
-                                    { name: 'customEntity3Icon', selector: { icon: {} } },
-                                ],
-                            },
-                        ],
-                    },
                 ]}
                 @value-changed=${this._valueChanged.bind(this)}
             ></ha-form>
+
+            ${this._renderCustomEntitiesEditor()}
 
             <ha-expansion-panel outlined style="margin-top: 10px;">
                 <div slot="header" style="padding: 8px 16px; font-weight: 500;">
@@ -229,6 +230,86 @@ export class AntminerCardEditor extends LitElement implements LovelaceCardEditor
     }
 
     private _computeLabelCallback = (data) => localize(`config.${data.name}`) ?? data.name;
+
+    private _computeCustomEntityLabel = (data) => {
+        const labels = {
+            entity: localize('config.customEntity'),
+            name: localize('config.customEntityName'),
+            icon: localize('config.customEntityIcon'),
+        };
+        return labels[data.name] ?? data.name;
+    };
+
+    private _normalizeCustomEntities(config: Record<string, unknown>): AntminerCustomEntityConfig[] {
+        return Array.isArray(config.customEntities)
+            ? config.customEntities
+                .map((item) => ({
+                    entity: item?.entity?.toString().trim(),
+                    name: item?.name?.toString().trim(),
+                    icon: item?.icon?.toString().trim(),
+                }))
+                .filter((item) => item.entity || item.name || item.icon)
+                .slice(0, 3)
+            : [];
+    }
+
+    private _customEntityRows(): AntminerCustomEntityConfig[] {
+        const rows = [...(this._config.customEntities ?? [])].slice(0, 3);
+        while (rows.length < 3) rows.push({});
+        return rows;
+    }
+
+    private _renderCustomEntitiesEditor(): TemplateResult {
+        const schema = [
+            {
+                type: 'grid',
+                column_min_width: '160px',
+                schema: [
+                    { name: 'entity', selector: { entity: {} } },
+                    { name: 'name', selector: { text: {} } },
+                    { name: 'icon', selector: { icon: {} } },
+                ],
+            },
+        ];
+
+        return html`
+            <ha-expansion-panel outlined class="custom-entities-panel">
+                <div slot="header" style="padding: 8px 16px; font-weight: 500;">
+                    ${localize('config.customEntities')}
+                </div>
+                <div class="custom-entity-list">
+                    ${this._customEntityRows().map((row, index) => html`
+                        <div>
+                            <div class="custom-entity-title">${localize('config.customEntityField')} ${index + 1}</div>
+                            <ha-form
+                                .hass=${this.hass}
+                                .data=${row}
+                                .computeLabel=${this._computeCustomEntityLabel}
+                                .schema=${schema}
+                                @value-changed=${(ev: CustomEvent) => this._customEntityChanged(index, ev)}
+                            ></ha-form>
+                        </div>
+                    `)}
+                </div>
+            </ha-expansion-panel>
+        `;
+    }
+
+    private _customEntityChanged(index: number, ev: CustomEvent): void {
+        const rows = this._customEntityRows();
+        rows[index] = {
+            entity: ev.detail.value?.entity?.toString().trim(),
+            name: ev.detail.value?.name?.toString().trim(),
+            icon: ev.detail.value?.icon?.toString().trim(),
+        };
+
+        const config = { ...this._config };
+        config.customEntities = rows
+            .filter((item) => item.entity || item.name || item.icon)
+            .slice(0, 3);
+        this._config = config;
+        fireEvent(this, 'config-changed', { config: this._config });
+    }
 
     private _valueChanged(ev: CustomEvent): void {
         const config = { ...this._config };

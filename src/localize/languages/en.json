@@ -38,16 +38,11 @@
     "cooling_mode": "Cooling mode entity",
     "active": "Mining switch entity",
     "device_id": "Device ID",
-    "customEntities": "Custom entities",
-    "customEntity1": "Custom entity 1",
-    "customEntity1Name": "Custom name 1",
-    "customEntity1Icon": "Custom icon 1",
-    "customEntity2": "Custom entity 2",
-    "customEntity2Name": "Custom name 2",
-    "customEntity2Icon": "Custom icon 2",
-    "customEntity3": "Custom entity 3",
-    "customEntity3Name": "Custom name 3",
-    "customEntity3Icon": "Custom icon 3"
+    "customEntities": "Additional info",
+    "customEntityField": "Field",
+    "customEntity": "Entity",
+    "customEntityName": "Name",
+    "customEntityIcon": "Icon"
   },
   "buttons": {
     "mining": "Mining",

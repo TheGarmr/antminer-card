@@ -5,8 +5,8 @@ type ExtraEntityKey = 'device_id';
 
 export interface AntminerCustomEntityConfig {
     entity?: string;
-    icon?: string;
     name?: string;
+    icon?: string;
 }
 
 export interface AntminerCardConfig extends LovelaceCardConfig {
@@ -31,14 +31,5 @@ export interface AntminerCardConfig extends LovelaceCardConfig {
     showBoards?: boolean;
     showCardVersion?: boolean;
     customEntities?: AntminerCustomEntityConfig[];
-    customEntity1?: string;
-    customEntity1Name?: string;
-    customEntity1Icon?: string;
-    customEntity2?: string;
-    customEntity2Name?: string;
-    customEntity2Icon?: string;
-    customEntity3?: string;
-    customEntity3Name?: string;
-    customEntity3Icon?: string;
     entities: Partial<Record<EntityKey | ExtraEntityKey | string, string>>;
 }
