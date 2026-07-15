@@ -59,6 +59,13 @@ export class AntminerDefaultLayout extends LitElement {
             min-width: 0;
         }
 
+        @media (max-width: 480px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .center {
             text-align: center !important;
             align-content: center !important;
@@ -565,7 +572,7 @@ export class AntminerDefaultLayout extends LitElement {
         if (directKeys.some((key) => (this._numericEntityState(key) ?? 0) > 0)) return true;
 
         for (let i = 0; i < MAX_FANS; i++) {
-            if ((this._numericEntityState(`fan_${i}_fan_speed`) ?? 0) > 0) return true;
+            if ((this._numericEntityState(this._fanEntityKey(i)) ?? 0) > 0) return true;
         }
 
         for (let i = 0; i < MAX_BOARDS; i++) {
@@ -601,6 +608,24 @@ export class AntminerDefaultLayout extends LitElement {
         return null;
     }
 
+    private _fanEntityKey(index: number): string {
+        return `fan_${index + 1}_fan_speed`;
+    }
+
+    private _fanRows(): Array<{ index: number; key: string; entity: any }> {
+        const max = this.config.fanCount && this.config.fanCount > 0 ? this.config.fanCount : MAX_FANS;
+        const rows: Array<{ index: number; key: string; entity: any }> = [];
+
+        for (let i = 0; i < max; i++) {
+            const key = this._fanEntityKey(i);
+            const entity = resolveEntity(this.hass, this.config, key);
+            if (!entity || this._isUnavailableState(entity.state)) continue;
+            rows.push({ index: i, key, entity });
+        }
+
+        return rows;
+    }
+
     private detectCount(family: 'board' | 'fan'): number {
         const configured = family === 'board' ? this.config.boardCount : this.config.fanCount;
         if (configured && configured > 0) return configured;
@@ -610,8 +635,9 @@ export class AntminerDefaultLayout extends LitElement {
         for (let i = 0; i < max; i++) {
             const key = family === 'board'
                 ? `board_${i}_board_temperature`
-                : `fan_${i}_fan_speed`;
-            if (resolveEntity(this.hass, this.config, key)) count = i + 1;
+                : this._fanEntityKey(i);
+            const entity = resolveEntity(this.hass, this.config, key);
+            if (entity && !this._isUnavailableState(entity.state)) count = i + 1;
         }
         return count;
     }
@@ -722,19 +748,18 @@ export class AntminerDefaultLayout extends LitElement {
     }
 
     private _renderFans(): TemplateResult {
-        const count = this.detectCount('fan');
-        if (!count) return html``;
+        const fanRows = this._fanRows();
+        if (!fanRows.length) return html``;
 
         const rows: TemplateResult[] = [];
-        for (let i = 0; i < count; i++) {
-            const key = `fan_${i}_fan_speed`;
+        for (const { index, key, entity } of fanRows) {
             const speed = this.getState(key, 0, '-');
             const unit = this.getUnit(key) || 'RPM';
-            const fanNumber = i + 1;
+            const fanLabel = entity.attributes?.fan_id ?? index + 1;
             rows.push(html`
                 <div class="data-row">
-                    <span class="name icon-name" title="${localize('stats.fan')} ${fanNumber}">
-                        <ha-icon class="fan-icon" icon="mdi:fan"></ha-icon>${fanNumber}
+                    <span class="name icon-name" title="${localize('stats.fan')} ${fanLabel}">
+                        <ha-icon class="fan-icon" icon="mdi:fan"></ha-icon>${fanLabel}
                     </span>
                     <span class="label clickable" @click=${(e) => this._navigate(e, key)}>${speed} ${unit}</span>
                 </div>

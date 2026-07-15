@@ -1,6 +1,6 @@
 {
   "name": "antminer-card",
-  "version": "1.4.2",
+  "version": "1.5.1",
   "description": "A customizable Home Assistant card for Antminer ASIC miners (hass-miner integration).",
   "main": "dist/antminer-card.js",
   "scripts": {
